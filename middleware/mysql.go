@@ -3,13 +3,49 @@ package middleware
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
+
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func InitDBPool(path string) error {
-	//普通DB方式
-	DbConfMap := &MysqlMapConf{}
-	err := ParseConfig(path, DbConfMap)
+	DBConfMap := &MysqlMapConf{}
+	err := ParseConfig(path, DBConfMap)
+	if err != nil {
+		return err
+	}
+	if len(DBConfMap.List) == 0 {
+		fmt.Printf("[info] %s%s\n", time.Now().Format(TimeFormat), " empty mysql config.")
+	}
+	DBMapPool = map[string]*sql.DB{}
+	GORMMapPool = map[string]*gorm.DB{}
+	for confName, DBConf := range DBConfMap.List {
+		dbpool, err := sql.Open("mysql", DBConf.DataSourceName)
+		if err != nil {
+			return err
+		}
+		dbpool.SetMaxOpenConns(DBConf.MaxOpenConn)
+		dbpool.SetMaxIdleConns(DBConf.MaxIdleConn)
+		dbpool.SetConnMaxLifetime(time.Duration(DBConf.MaxConnLifeTime) * time.Second)
+		err = dbpool.Ping()
+		if err != nil {
+			return err
+		}
+		dbgorm, err := gorm.Open(mysql.Open(DBConf.DataSourceName), &gorm.Config{
+			NamingStrategy: schema.NamingStrategy{
+				SingularTable: true},
+				Logger: ,
+		})
+		db, _ := dbgorm.DB()
+		err = db.Ping()
+		if err != nil {
+			return err
+		}
+
+	}
 }
 
 func GetDBPool(name string) (*sql.DB, error) {
@@ -24,4 +60,8 @@ func GetGormPool(name string) (*gorm.DB, error) {
 		return dbpool, nil
 	}
 	return nil, errors.New("get db pool error")
+}
+
+type MySQLGormLogger struct {
+	
 }
