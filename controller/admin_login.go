@@ -15,6 +15,7 @@ func AdminLoginRegister(group *gin.RouterGroup) {
 func (admin *AdminLoginController) AdminLogin(ctx *gin.Context) {
 	params := &dto.AdminLoginInput{}
 	if err := params.BindValidParam(ctx); err != nil {
-		middleware.ResponseError(ctx, 10001, err)
+		middleware.ResponseError(ctx, 2000, err)
 	}
+
 }

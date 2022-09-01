@@ -3,11 +3,13 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// 1000以下状态通用码,1000以上为自定义错误码
 type ResponseCode int32
 
 const (
@@ -57,9 +59,13 @@ func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 	}
 	resp := &Response{
 		ErrorCode: code,
-		ErrorMsg:  "",
-		Data:      nil,
-		TraceID:   nil,
-		Stack:     nil,
+		ErrorMsg:  err.Error(),
+		Data:      "",
+		TraceID:   traceId,
+		Stack:     stack,
 	}
+	ctx.JSON(http.StatusOK, resp)
+	response, _ := json.Marshal(resp)
+	ctx.Set("response", string(response))
+	ctx.AbortWithError(int(code), err)
 }
