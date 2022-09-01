@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 type ResponseCode int32
@@ -42,6 +44,22 @@ func ResponseSuccess(ctx *gin.Context, data any) {
 	ctx.Set("response", string(response))
 }
 
-func ResponseError(ctx *gin.Context, data any) {
-
+func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
+	trace, _ := ctx.Get("trace")
+	traceContext, _ := trace.(*TraceContext)
+	traceId := ""
+	if traceContext != nil {
+		traceId = traceContext.TraceId
+	}
+	stack := ""
+	if ctx.Query("is_debug") == "1" || GetConfEnv() == "dev" {
+		stack = strings.Replace(fmt.Sprintf("%+v", err), err.Error()+"\n", "", -1)
+	}
+	resp := &Response{
+		ErrorCode: code,
+		ErrorMsg:  "",
+		Data:      nil,
+		TraceID:   nil,
+		Stack:     nil,
+	}
 }
