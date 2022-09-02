@@ -6,14 +6,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
-var ConfEnv string
-var DBMapPool map[string]*sql.DB
-var GORMMapPool map[string]*gorm.DB
+var (
+	ConfEnv      string
+	DBMapPool    map[string]*sql.DB
+	GORMMapPool  map[string]*gorm.DB
+	ViperConfMap map[string]*viper.Viper
+)
 
 type MysqlMapConf struct {
 	List map[string]*MySQLConf `mapstructure:"list"`
@@ -29,6 +33,19 @@ type MySQLConf struct {
 
 func GetConfEnv() string {
 	return ConfEnv
+}
+
+func GetStringConf(key string) string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return ""
+	}
+	v, ok := ViperConfMap[keys[0]]
+	if !ok {
+		return ""
+	}
+	confString := v.GetString(strings.Join(keys[1:len(keys)], "."))
+	return confString
 }
 
 func ParseConfig(path string, conf any) error {
