@@ -42,7 +42,22 @@ func initModule(configPath string, modules []string) error {
 	if err := InitViperConf(); err != nil {
 		return err
 	}
+	// 初始化base配置
+	if InArrayString("base", modules) {
+		if err := InitBaseConf(GetConfPath("base")); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
+		}
+	}
 	return nil
+}
+
+func InArrayString(s string, arr []string) bool {
+	for _, v := range arr {
+		if s == v {
+			return true
+		}
+	}
+	return false
 }
 
 func GetLocalIPs() (ips []net.IP) {

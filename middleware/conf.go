@@ -87,10 +87,6 @@ func ParseConfPath(config string) error {
 	return nil
 }
 
-//func InitViperConf() error {
-//	f, err := os.Open(Con)
-//}
-
 func SetUpLogInstanceWithConf(lc LogConfig, logger *Logger) (err error) {
 	if lc.FW.On {
 
@@ -128,45 +124,48 @@ func InitViperConf() error {
 	return nil
 }
 
-//func InitBaseConf(path string) error {
-//	ConfBase = &BaseConf{}
-//	err := ParseConfig(path, ConfBase)
-//	if err != nil {
-//		return err
-//	}
-//	if ConfBase.DebugMode == "" {
-//		if ConfBase.Base.DebugMode != "" {
-//			ConfBase.DebugMode = ConfBase.Base.DebugMode
-//		} else {
-//			ConfBase.DebugMode = "debug"
-//		}
-//	}
-//	if ConfBase.TimeLocation == "" {
-//		if ConfBase.Base.TimeLocation != "" {
-//			ConfBase.TimeLocation = ConfBase.Base.TimeLocation
-//		} else {
-//			ConfBase.TimeLocation = "Asia/Shanghai"
-//		}
-//	}
-//	if ConfBase.Log.Level == "" {
-//		ConfBase.Log.Level = "trace"
-//	}
-//	logConf := LogConfig{
-//		Level: ConfBase.Log.Level,
-//		FW: LogConfFileWriter{
-//			On:              ConfBase.Log.FW.On,
-//			LogPath:         ConfBase.Log.FW.LogPath,
-//			RotateLogPath:   ConfBase.Log.FW.RotateLogPath,
-//			WfLogPath:       ConfBase.Log.FW.WfLogPath,
-//			RotateWfLogPath: ConfBase.Log.FW.RotateWfLogPath,
-//		},
-//		CW: LogConfConsoleWriter{
-//			On:    ConfBase.Log.CW.On,
-//			Color: ConfBase.Log.CW.Color,
-//		},
-//	}
-//
-//}
+func InitBaseConf(path string) error {
+	ConfBase = &BaseConf{}
+	err := ParseConfig(path, ConfBase)
+	if err != nil {
+		return err
+	}
+	if ConfBase.DebugMode == "" {
+		if ConfBase.Base.DebugMode != "" {
+			ConfBase.DebugMode = ConfBase.Base.DebugMode
+		} else {
+			ConfBase.DebugMode = "debug"
+		}
+	}
+	if ConfBase.TimeLocation == "" {
+		if ConfBase.Base.TimeLocation != "" {
+			ConfBase.TimeLocation = ConfBase.Base.TimeLocation
+		} else {
+			ConfBase.TimeLocation = "Asia/Shanghai"
+		}
+	}
+	if ConfBase.Log.Level == "" {
+		ConfBase.Log.Level = "trace"
+	}
+	logConf := LogConfig{
+		Level: ConfBase.Log.Level,
+		FW: LogConfFileWriter{
+			On:              ConfBase.Log.FW.On,
+			LogPath:         ConfBase.Log.FW.LogPath,
+			RotateLogPath:   ConfBase.Log.FW.RotateLogPath,
+			WfLogPath:       ConfBase.Log.FW.WfLogPath,
+			RotateWfLogPath: ConfBase.Log.FW.RotateWfLogPath,
+		},
+		CW: LogConfConsoleWriter{
+			On:    ConfBase.Log.CW.On,
+			Color: ConfBase.Log.CW.Color,
+		},
+	}
+	if err := SetUpLogInstanceWithConf(logConf); err != nil {
+		panic(err)
+	}
+	Set
+}
 
 func GetConfEnv() string {
 	return ConfEnv
