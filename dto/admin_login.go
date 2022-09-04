@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/weiyouwozuiku/gateway/public"
+	"github.com/weiyouwozuiku/gateway/middleware"
 )
 
 type AdminLoginInput struct {
@@ -11,5 +11,5 @@ type AdminLoginInput struct {
 }
 
 func (input *AdminLoginInput) BindValidParam(ctx *gin.Context) error {
-	return public.DefaultValidParams(ctx, input)
+	return middleware.DefaultValidParams(ctx, input)
 }

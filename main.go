@@ -1,19 +1,28 @@
 package main
 
 import (
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"flag"
+	"github.com/weiyouwozuiku/gateway/middleware"
+	"os"
+)
+
+var (
+	endPoint = flag.String("endpoint", "", "input endpoint dashboard or server")
+	config   = flag.String("config", "", "input config file like ./conf/dev/")
 )
 
 func main() {
-	r := gin.Default()
-	pprof.Register(r)
-	// 定义一个路径为 /ping 的 GET 格式路由，并返回 JSON 数据
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello, World !",
-		})
-	})
-	r.Run(":8080") // 启动服务，并监听 8000 端口
+	flag.Parse()
+	if *endPoint == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *config == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *endPoint == "dashboard" {
+		middleware.InitModule(*config)
+		defer
+	}
 }
