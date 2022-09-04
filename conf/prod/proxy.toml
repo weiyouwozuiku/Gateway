@@ -1,0 +1,13 @@
+[base]
+debug_mode="trace"
+time_location="Asia/Shanghai"
+[http]
+addr=":8080"
+read_timeout=10
+write_timeout=10
+max_header_bytes=20
+[https]
+addr=":4433"
+read_timeout=10
+write_timeout=10
+max_header_bytes=20
