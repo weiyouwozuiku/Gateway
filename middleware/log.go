@@ -117,27 +117,39 @@ func (l *Logger) deliverRecordToWriter(lvl int, format string, args ...any) {
 	l.tunnel <- r
 }
 
-func (l *Logger) Trace(fmt string, args ...interface{}) {
+func (l *Logger) Close() {
+	close(l.tunnel)
+	<-l.c
+	for _, w := range l.writers {
+		if f, ok := w.(Flusher); ok {
+			if err := f.Flush(); err != nil {
+				log.Println(err)
+			}
+		}
+	}
+}
+
+func (l *Logger) Trace(fmt string, args ...any) {
 	l.deliverRecordToWriter(TRACE, fmt, args...)
 }
 
-func (l *Logger) Debug(fmt string, args ...interface{}) {
+func (l *Logger) Debug(fmt string, args ...any) {
 	l.deliverRecordToWriter(DEBUG, fmt, args...)
 }
 
-func (l *Logger) Warn(fmt string, args ...interface{}) {
+func (l *Logger) Warn(fmt string, args ...any) {
 	l.deliverRecordToWriter(WARNING, fmt, args...)
 }
 
-func (l *Logger) Info(fmt string, args ...interface{}) {
+func (l *Logger) Info(fmt string, args ...any) {
 	l.deliverRecordToWriter(INFO, fmt, args...)
 }
 
-func (l *Logger) Error(fmt string, args ...interface{}) {
+func (l *Logger) Error(fmt string, args ...any) {
 	l.deliverRecordToWriter(ERROR, fmt, args...)
 }
 
-func (l *Logger) Fatal(fmt string, args ...interface{}) {
+func (l *Logger) Fatal(fmt string, args ...any) {
 	l.deliverRecordToWriter(FATAL, fmt, args...)
 }
 func NewLogger() *Logger {
@@ -222,4 +234,48 @@ func Close() {
 	logger_default.Close()
 	logger_default = nil
 	takeup = false
+}
+func SetLevel(lvl int) {
+	defaultLoggerInit()
+	logger_default.level = lvl
+}
+
+func SetLayout(layout string) {
+	defaultLoggerInit()
+	logger_default.layout = layout
+}
+
+func Trace(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(TRACE, fmt, args...)
+}
+
+func Debug(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(DEBUG, fmt, args...)
+}
+
+func Warn(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(WARNING, fmt, args...)
+}
+
+func Info(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(INFO, fmt, args...)
+}
+
+func Error(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(ERROR, fmt, args...)
+}
+
+func Fatal(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(FATAL, fmt, args...)
+}
+
+func Register(w Writer) {
+	defaultLoggerInit()
+	logger_default.Register(w)
 }
