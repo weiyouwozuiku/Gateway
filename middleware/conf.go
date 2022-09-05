@@ -87,6 +87,11 @@ func ParseConfPath(config string) error {
 	return nil
 }
 
+func SetupDefaultLogWithConf(lc LogConfig) (err error) {
+	defaultLoggerInit()
+	return SetUpLogInstanceWithConf(lc, logger_default)
+}
+
 func SetUpLogInstanceWithConf(lc LogConfig, logger *Logger) (err error) {
 	if lc.FW.On {
 
@@ -145,7 +150,7 @@ func InitBaseConf(path string) error {
 		}
 	}
 	if ConfBase.Log.Level == "" {
-		ConfBase.Log.Level = "trace"
+		ConfBase.Log.Level = "debug"
 	}
 	logConf := LogConfig{
 		Level: ConfBase.Log.Level,
@@ -161,10 +166,11 @@ func InitBaseConf(path string) error {
 			Color: ConfBase.Log.CW.Color,
 		},
 	}
-	if err := SetUpLogInstanceWithConf(logConf); err != nil {
+	if err := SetupDefaultLogWithConf(logConf); err != nil {
 		panic(err)
 	}
-	Set
+	SetLayout("2006-01-02T15:04:05.000")
+	return nil
 }
 
 func GetConfEnv() string {
@@ -192,7 +198,9 @@ func GetIntConf(key string) int {
 	return conf
 }
 
-func GetBoolConf() {}
+func GetBoolConf() {
+
+}
 
 func GetFloat64Conf() {
 
