@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weiyouwozuiku/gateway/middleware/lib"
 )
 
 // 1000以下状态通用码,1000以上为自定义错误码
@@ -29,7 +30,7 @@ type Response struct {
 
 func ResponseSuccess(ctx *gin.Context, data any) {
 	trace, _ := ctx.Get("trace")
-	traceContext, _ := trace.(*TraceContext)
+	traceContext, _ := trace.(*lib.TraceContext)
 	traceId := ""
 	if traceContext != nil {
 		traceId = traceContext.TraceId
@@ -48,7 +49,7 @@ func ResponseSuccess(ctx *gin.Context, data any) {
 
 func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 	trace, _ := ctx.Get("trace")
-	traceContext, _ := trace.(*TraceContext)
+	traceContext, _ := trace.(*lib.TraceContext)
 	traceId := ""
 	if traceContext != nil {
 		traceId = traceContext.TraceId
