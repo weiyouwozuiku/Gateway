@@ -22,44 +22,8 @@ type BaseConf struct {
 	} `mapstructure:"base"`
 }
 
-type LogConfig struct {
-	Level string               `mapstructure:"level"`
-	FW    LogConfFileWriter    `mapstructure:"file_writer"`
-	CW    LogConfConsoleWriter `mapstructure:"console_writer"`
-}
-
-type LogConfFileWriter struct {
-	On              bool   `mapstructure:"on"`
-	LogPath         string `mapstructure:"log_path"`
-	RotateLogPath   string `mapstructure:"rotate_log_path"`
-	WfLogPath       string `mapstructure:"wf_log_path"`
-	RotateWfLogPath string `mapstructure:"rotate_wf_log_path"`
-}
-
-type LogConfConsoleWriter struct {
-	On    bool `mapstructure:"on"`
-	Color bool `mapstructure:"color"`
-}
-
-type MySQLConf struct {
-	DriverName      string `mapstructure:"driver_name"`
-	DataSourceName  string `mapstructure:"data_source_name"`
-	MaxOpenConn     int    `mapstructure:"max_open_conn"`
-	MaxIdleConn     int    `mapstructure:"max_idle_conn"`
-	MaxConnLifeTime int    `mapstructure:"max_conn_life_time"`
-}
-
 type MySQLMapConf struct {
 	Map map[string]*MySQLConf `mapstructure:"map"`
-}
-
-type RedisConf struct {
-	ProxyList    []string `mapstructure:"proxy_list"`
-	Password     string   `mapstructure:"password"`
-	DB           int      `mapstructure:"db"`
-	ConnTimeout  int      `mapstructure:"conn_timeout"`
-	ReadTimeout  int      `mapstructure:"read_timeout"`
-	WriteTimeout int      `mapstructure:"write_timeout"`
 }
 
 type RedisMapConf struct {

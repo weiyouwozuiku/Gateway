@@ -23,6 +23,7 @@ func main() {
 	}
 	if *endPoint == "dashboard" {
 		middleware.InitModule(*config)
-		defer
+		defer middleware.Destory()
+
 	}
 }

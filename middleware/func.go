@@ -34,44 +34,45 @@ func initModule(configPath string, modules []string) error {
 	if len(ips) > 0 {
 		LocalIP = ips[0]
 	}
+
 	// 解析配置文件目录，配置全局配置变量
 	if err := ParseConfPath(configPath); err != nil {
 		return err
 	}
+
 	// 初始化配置文件
 	if err := InitViperConf(); err != nil {
 		return err
 	}
+
 	// 初始化base配置
 	if InArrayString("base", modules) {
 		if err := InitBaseConf(GetConfPath("base")); err != nil {
 			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
 		}
 	}
+	if InArrayString("redis", modules) {
+
+	}
+	if InArrayString("mysql", modules) {
+
+	}
+	//设置时区
+	if location, err := time.LoadLocation(ConfBase.TimeLocation); err != nil {
+		return err
+	} else {
+		TimeLocation = location
+	}
+	log.Printf("[INFO] %s\n", " success loading resources.")
+	log.Println("------------------------------------------------------------------------")
 	return nil
 }
 
-func InArrayString(s string, arr []string) bool {
-	for _, v := range arr {
-		if s == v {
-			return true
-		}
-	}
-	return false
-}
-
-func GetLocalIPs() (ips []net.IP) {
-	interfaceAddr, err := net.InterfaceAddrs()
-	if err != nil {
-		return nil
-	}
-	for _, addr := range interfaceAddr {
-		ipNet, isVaildIpNet := addr.(*net.IPNet)
-		if isVaildIpNet && !ipNet.IP.IsLoopback() {
-			if ipNet.IP.To4() != nil {
-				ips = append(ips, ipNet.IP)
-			}
-		}
-	}
-	return ips
+func Destory() {
+	log.Println("------------------------------------------------------------------------")
+	log.Printf("[INFO] %s\n", " start destroy resources.")
+	CloseDB()
+	Close()
+	log.Printf("[INFO] %s\n", " success destroy resources.")
+	log.Println("------------------------------------------------------------------------")
 }

@@ -41,6 +41,25 @@ type Logger struct {
 	recordPool  *sync.Pool
 }
 
+type LogConfig struct {
+	Level string               `mapstructure:"level"`
+	FW    LogConfFileWriter    `mapstructure:"file_writer"`
+	CW    LogConfConsoleWriter `mapstructure:"console_writer"`
+}
+
+type LogConfFileWriter struct {
+	On              bool   `mapstructure:"on"`
+	LogPath         string `mapstructure:"log_path"`
+	RotateLogPath   string `mapstructure:"rotate_log_path"`
+	WfLogPath       string `mapstructure:"wf_log_path"`
+	RotateWfLogPath string `mapstructure:"rotate_wf_log_path"`
+}
+
+type LogConfConsoleWriter struct {
+	On    bool `mapstructure:"on"`
+	Color bool `mapstructure:"color"`
+}
+
 var (
 	LEVEL_FLAGS    = [...]string{"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
 	logger_default *Logger

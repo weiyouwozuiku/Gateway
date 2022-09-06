@@ -15,11 +15,17 @@ func Test_GetStringConf(t *testing.T) {
 	fmt.Print(mode)
 }
 
-func TestGetStringSliceConf(t *testing.T) {
+func Test_GetStringSliceConf(t *testing.T) {
 	schemes := middleware.GetStringSliceConf("base.swagger.schemes")
 	fmt.Print(schemes)
 }
 
-func TestParseConfPath(t *testing.T) {
+func Test_ParseConfPath(t *testing.T) {
 	middleware.ParseConfPath("conf/dev/base.toml")
+}
+
+func Test_ParseConfig(t *testing.T) {
+	confBase := &middleware.BaseConf{}
+	middleware.ParseConfig("conf/dev/base.toml", confBase)
+	t.Log(confBase)
 }
