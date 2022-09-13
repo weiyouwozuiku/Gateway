@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/weiyouwozuiku/gateway/middleware"
 	"os"
+
+	"github.com/weiyouwozuiku/gateway/middleware"
 )
 
 var (
@@ -11,7 +12,7 @@ var (
 	config   = flag.String("config", "", "input config file like ./conf/dev/")
 )
 
-func main() {
+func server() {
 	flag.Parse()
 	if *endPoint == "" {
 		flag.Usage()
@@ -26,4 +27,8 @@ func main() {
 		defer middleware.Destory()
 
 	}
+}
+
+func main() {
+	middleware.InitModule("./conf/dev")
 }
