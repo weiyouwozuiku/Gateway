@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"path"
@@ -209,4 +210,63 @@ func (l *Logger) Close() {
 			}
 		}
 	}
+}
+func SetupLogInstanceWithConf(lc LogConfig, logger *Logger) error {
+	if lc.FW.On {
+		if len(lc.FW.LogPath) > 0 {
+			w := NewFileWriter()
+			w.fileName = lc.FW.LogPath
+			w.SetPathPattern(lc.FW.RotateLogPath)
+			w.logLevelFloor = TRACE
+			if len(lc.FW.WfLogPath) > 0 {
+				w.logLevelCeil = INFO
+			} else {
+				w.logLevelCeil = ERROR
+			}
+			logger.Register(w)
+		}
+		if len(lc.FW.WfLogPath) > 0 {
+			w := NewFileWriter()
+			w.fileName = lc.FW.WfLogPath
+			w.SetPathPattern(lc.FW.RotateWfLogPath)
+			w.logLevelFloor = WARNING
+			w.logLevelCeil = ERROR
+			logger.Register(w)
+		}
+	}
+	if lc.CW.On {
+		w := NewConsoleWriter()
+		w.color = lc.CW.Color
+		logger.Register(w)
+	}
+	switch lc.Level {
+	case "trace":
+		logger.level = TRACE
+	case "debug":
+		logger.level = DEBUG
+	case "info":
+		logger.level = INFO
+	case "warning":
+		logger.level = WARNING
+	case "error":
+		logger.level = ERROR
+	case "fatal":
+		logger.level = FATAL
+	default:
+		return errors.New("Invalid log level")
+	}
+	return nil
+}
+func defaultLoggerInit() {
+	if !takeup {
+		logger_default = NewLogger()
+	}
+}
+func SetupDefaultLogWithConf(lc LogConfig) error {
+	defaultLoggerInit()
+	return SetupLogInstanceWithConf(lc, logger_default)
+}
+func SetLayout(layout string) {
+	defaultLoggerInit()
+	logger_default.layout = layout
 }
