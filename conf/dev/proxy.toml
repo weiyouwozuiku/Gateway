@@ -1,4 +1,4 @@
-# This is base config
+# This is proxy config
 
 [base]
     debug_mode="release"

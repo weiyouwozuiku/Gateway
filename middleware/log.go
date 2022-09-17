@@ -270,3 +270,27 @@ func SetLayout(layout string) {
 	defaultLoggerInit()
 	logger_default.layout = layout
 }
+func Trace(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(TRACE, fmt, args...)
+}
+func Debug(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(DEBUG, fmt, args...)
+}
+func Warn(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(WARNING, fmt, args...)
+}
+func Info(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(INFO, fmt, args...)
+}
+func Error(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(ERROR, fmt, args...)
+}
+func Fatal(fmt string, args ...any) {
+	defaultLoggerInit()
+	logger_default.deliverRecordToWriter(FATAL, fmt, args...)
+}

@@ -54,18 +54,32 @@ func initModules(configPath string, modules []string) error {
 	// 加载base配置
 	if InArrayString("base", modules) {
 		if err := InitBaseConf("base"); err != nil {
-			return fmt.Errorf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
 		}
+	}
+
+	// 设置时区
+	if location, err := time.LoadLocation(ConfBase.TimeLocation); err != nil {
+		return err
+	} else {
+		TimeLocation = location
 	}
 
 	// 加载mysql配置
 	if InArrayString("mysql", modules) {
-
+		if err := InitDBConf("mysql"); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBConf:"+err.Error())
+		}
 	}
 
 	// 加载redis配置
 	if InArrayString("redis", modules) {
-
+		if err := InitRedisConf("redis"); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
+		}
 	}
+
+	log.Printf("[INFO] %s\n", " success loading resources.")
+	log.Println("------------------------------------------------------------------------")
 	return nil
 }
