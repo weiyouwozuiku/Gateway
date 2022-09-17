@@ -16,5 +16,6 @@
 .vscode/
 .idea/
 
-conf/dev
+conf/dev/*
 log/
+middleware/log/*
