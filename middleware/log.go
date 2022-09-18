@@ -294,3 +294,10 @@ func Fatal(fmt string, args ...any) {
 	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(FATAL, fmt, args...)
 }
+func CloseLogger() {
+	if logger_default != nil {
+		logger_default.Close()
+		logger_default = nil
+		takeup = false
+	}
+}

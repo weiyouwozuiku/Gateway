@@ -83,3 +83,11 @@ func initModules(configPath string, modules []string) error {
 	log.Println("------------------------------------------------------------------------")
 	return nil
 }
+func Destory() {
+	log.Println("------------------------------------------------------------------------")
+	log.Printf("[INFO] %s\n", " start destroy resources.")
+	CloseDB()
+	CloseLogger()
+	log.Printf("[INFO] %s\n", " success destroy resources.")
+	log.Println("------------------------------------------------------------------------")
+}

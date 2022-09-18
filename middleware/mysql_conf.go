@@ -2,15 +2,20 @@ package middleware
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var (
-	DBMapPool   map[string]*sql.DB
-	GORMMapPool map[string]*gorm.DB
+	DBMapPool       map[string]*sql.DB
+	GORMMapPool     map[string]*gorm.DB
+	DBDefaultPool   *sql.DB
+	GORMDefaultPool *gorm.DB
 )
 
 type MySQLConf struct {
@@ -36,19 +41,70 @@ func InitDBConf(confName string) error {
 	DBMapPool = map[string]*sql.DB{}
 	GORMMapPool = map[string]*gorm.DB{}
 	for k, v := range DBConfMap.List {
-		// 1. 创建mysql连接池
-		mysqlPool, err := sql.Open("mysql", v.DataSourceName)
+		// 原生db连接池
+		sqlDB, err := sql.Open(v.DriverName, v.DataSourceName)
 		if err != nil {
 			return err
 		}
-		mysqlPool.SetMaxOpenConns(v.MaxOpenConn)
-		mysqlPool.SetMaxIdleConns(v.MaxIdleConn)
-		mysqlPool.SetConnMaxLifetime(time.Duration(v.MaxConnLifeTime) * time.Second)
-		if err := mysqlPool.Ping(); err != nil {
+		sqlDB.SetMaxOpenConns(v.MaxOpenConn)
+		sqlDB.SetMaxIdleConns(v.MaxIdleConn)
+		sqlDB.SetConnMaxLifetime(time.Duration(v.MaxConnLifeTime) * time.Second)
+		if err := sqlDB.Ping(); err != nil {
 			return err
 		}
-		// 2. gorm使用已有连接池创建
-		gormPool, err := gorm.Open()
+		// gorm db连接池
+		gormDB, err := gorm.Open(mysql.New(mysql.Config{
+			DSN: v.DataSourceName,
+		}), &gorm.Config{})
+		if err != nil {
+			return err
+		}
+		if gormSQLDB, err := gormDB.DB(); err != nil {
+			return err
+		} else {
+			if err := gormSQLDB.Ping(); err != nil {
+				return err
+			}
+		}
+		// TODO: gorm设置优化
+		DBMapPool[k] = sqlDB
+		GORMMapPool[k] = gormDB
+	}
+	// 配置默认数据库连接池
+	if db, err := GetDBPool("default"); err != nil {
+		DBDefaultPool = db
+	}
+	if db, err := GetGORMPool("default"); err != nil {
+		GORMDefaultPool = db
+	}
+	return nil
+}
+func GetDBPool(name string) (*sql.DB, error) {
+	if pool, ok := DBMapPool[name]; ok {
+		return pool, nil
+	}
+	return nil, errors.New("get DBPool error")
+}
+func GetGORMPool(name string) (*gorm.DB, error) {
+	if pool, ok := GORMMapPool[name]; ok {
+		return pool, nil
+	}
+	return nil, errors.New("get GORMPool error")
+}
+func CloseDB() error {
+	for _, db := range DBMapPool {
+		if err := db.Close(); err != nil {
+			return err
+		}
+	}
+	for _, db := range GORMMapPool {
+		if sqlDB, err := db.DB(); err != nil {
+			return err
+		} else {
+			if err := sqlDB.Close(); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
