@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -29,7 +30,14 @@ type MySQLConf struct {
 type MySQLMapConf struct {
 	List map[string]*MySQLConf `mapstructure:"list"`
 }
-
+type MySQLGORMLogger struct{
+	LogLevel logger.LogLevel
+	SlowThreshold time.Duration
+}
+type DefaultMySQLGORMLogger = MySQLGORMLogger{
+	LoggerLevel:logger.Info
+	
+}
 func InitDBConf(confName string) error {
 	DBConfMap := &MySQLMapConf{}
 	if err := ParseConfig(confName, DBConfMap); err != nil {
@@ -54,8 +62,10 @@ func InitDBConf(confName string) error {
 		}
 		// gorm db连接池
 		gormDB, err := gorm.Open(mysql.New(mysql.Config{
-			DSN: v.DataSourceName,
-		}), &gorm.Config{})
+			Conn: sqlDB,
+		}), &gorm.Config{
+			Logger: ,
+		})
 		if err != nil {
 			return err
 		}
