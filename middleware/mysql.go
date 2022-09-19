@@ -13,10 +13,14 @@ import (
 )
 
 var (
-	DBMapPool       map[string]*sql.DB
-	GORMMapPool     map[string]*gorm.DB
-	DBDefaultPool   *sql.DB
-	GORMDefaultPool *gorm.DB
+	DBMapPool              map[string]*sql.DB
+	GORMMapPool            map[string]*gorm.DB
+	DBDefaultPool          *sql.DB
+	GORMDefaultPool        *gorm.DB
+	DefaultMySQLGORMLogger = MySQLGORMLogger{
+		LogLevel:      logger.Info,
+		SlowThreshold: 200 * time.Millisecond,
+	}
 )
 
 type MySQLConf struct {
@@ -30,14 +34,7 @@ type MySQLConf struct {
 type MySQLMapConf struct {
 	List map[string]*MySQLConf `mapstructure:"list"`
 }
-type MySQLGORMLogger struct{
-	LogLevel logger.LogLevel
-	SlowThreshold time.Duration
-}
-type DefaultMySQLGORMLogger = MySQLGORMLogger{
-	LoggerLevel:logger.Info
-	
-}
+
 func InitDBConf(confName string) error {
 	DBConfMap := &MySQLMapConf{}
 	if err := ParseConfig(confName, DBConfMap); err != nil {
@@ -64,7 +61,7 @@ func InitDBConf(confName string) error {
 		gormDB, err := gorm.Open(mysql.New(mysql.Config{
 			Conn: sqlDB,
 		}), &gorm.Config{
-			Logger: ,
+			Logger: &DefaultMySQLGORMLogger,
 		})
 		if err != nil {
 			return err
