@@ -25,6 +25,9 @@ const (
 	WARNING
 	ERROR
 	FATAL
+)
+
+const (
 	tunnel_size_default = 1 << 10
 	FlushTime           = time.Millisecond * 500
 	RotateTime          = time.Second * 10
