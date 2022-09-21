@@ -31,7 +31,6 @@ func InitModules(path string, modules ...string) error {
 	}
 	return nil
 }
-
 func initModules(configPath string, modules []string) error {
 	if configPath == "" {
 		fmt.Println("input config file like ../conf/dev/")

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"sync"
 	"testing"
 	"time"
@@ -29,14 +28,12 @@ func SetUp() {
 }
 
 func TearDown() {
-
+	middleware.Destory()
 }
 
-func TestPost(t *testing.T){
+// 测试Post请求
+func TestPost(t *testing.T) {
 	InitTestServer()
-	a:=url.Values(
-		"city_id":{"12"},
-	)
 }
 
 func InitTestServer() {

@@ -115,3 +115,22 @@ func CloseDB() error {
 	}
 	return nil
 }
+func DBPoolQuery(trace *TraceContext, sqlDB *sql.DB, query string, args ...any) (*sql.Rows, error) {
+	startExecTime := time.Now()
+	rows, err := sqlDB.Query(query, args...)
+	endExecTime := time.Now()
+	if err != nil {
+		Log.TagError(trace, LTagMySQLError, map[string]any{
+			"sql":       query,
+			"bind":      args,
+			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	} else {
+		Log.TagInfo(trace, LTagMySQLInfo, map[string]any{
+			"sql":       query,
+			"bind":      args,
+			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	}
+	return rows, err
+}
