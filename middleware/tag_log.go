@@ -14,6 +14,7 @@ const (
 	LTagMySQLWarn    = "_com_mysql_Warn"
 	LTagMySQLError   = "_com_mysql_Error"
 	LTagMySQLTrace   = "_com_mysql_Trace"
+	LTagMySQLSlow    = "_com_mysql_Slow"
 
 	LTagRedisFailed  = "_com_redis_Failure"
 	LTagRedisSuccess = "_com_redis_Success"

@@ -16,12 +16,18 @@ var (
 	LocalIP      = net.ParseIP("127.0.0.1")
 )
 
-func InitModules(path string) error {
+func InitModules(path string, modules ...string) error {
 	if path == "" {
 		return errors.New("")
 	}
-	if err := initModules(path, []string{"base", "mysql", "redis"}); err != nil {
-		return err
+	if len(modules) == 0 {
+		if err := initModules(path, []string{"base", "mysql", "redis"}); err != nil {
+			return err
+		}
+	} else {
+		if err := initModules(path, modules); err != nil {
+			return err
+		}
 	}
 	return nil
 }

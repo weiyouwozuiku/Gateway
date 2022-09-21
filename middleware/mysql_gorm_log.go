@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -55,6 +56,29 @@ func (mgl *MySQLGORMLogger) Trace(ctx context.Context, begin time.Time, fc func(
 		"current_time":    currentTime,
 	}
 	switch {
-		case err!=nil&&
+	case err != nil && mgl.LogLevel >= logger.Error && (!errors.Is(err, logger.ErrRecordNotFound)):
+		msg["err"] = err
+		if rows == -1 {
+			Log.TagInfo(trace, LTagMySQLFailed, msg)
+		} else {
+			msg["rows"] = rows
+			Log.TagInfo(trace, LTagMySQLFailed, msg)
+		}
+	case elapsed > mgl.SlowThreshold && mgl.SlowThreshold != 0 && mgl.LogLevel >= logger.Warn:
+		slowLog := fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
+		msg["slowLog"] = slowLog
+		if rows == -1 {
+			Log.TagInfo(trace, LTagMySQLSlow, msg)
+		} else {
+			msg["rows"] = rows
+			Log.TagInfo(trace, LTagMySQLSlow, msg)
+		}
+	case mgl.LogLevel == logger.Info:
+		if rows == -1 {
+			Log.TagInfo(trace, LTagMySQLSuccess, msg)
+		} else {
+			msg["rows"] = rows
+			Log.TagInfo(trace, LTagMySQLSuccess, msg)
+		}
 	}
 }
