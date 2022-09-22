@@ -2,37 +2,38 @@ package middleware
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
 const (
 	LTagUndefined = "_undef"
 
-	LTagMySQLFailed  = "_com_mysql_Failure"
-	LTagMySQLSuccess = "_com_mysql_Success"
-	LTagMySQLInfo    = "_com_mysql_Info"
-	LTagMySQLWarn    = "_com_mysql_Warn"
-	LTagMySQLError   = "_com_mysql_Error"
-	LTagMySQLTrace   = "_com_mysql_Trace"
-	LTagMySQLSlow    = "_com_mysql_Slow"
+	LTagMySQLFailed  = "_com_mysql_failure"
+	LTagMySQLSuccess = "_com_mysql_success"
+	LTagMySQLInfo    = "_com_mysql_info"
+	LTagMySQLWarn    = "_com_mysql_warn"
+	LTagMySQLError   = "_com_mysql_error"
+	LTagMySQLTrace   = "_com_mysql_trace"
+	LTagMySQLSlow    = "_com_mysql_slow"
 
-	LTagRedisFailed  = "_com_redis_Failure"
-	LTagRedisSuccess = "_com_redis_Success"
+	LTagRedisFailed  = "_com_redis_failure"
+	LTagRedisSuccess = "_com_redis_success"
 
-	LTagThriftFailed  = "_com_thrift_Failure"
-	LTagThriftSuccess = "_com_thrift_Success"
+	LTagThriftFailed  = "_com_thrift_failure"
+	LTagThriftSuccess = "_com_thrift_success"
 
-	LTagHTTPFailed  = "_com_http_Failure"
-	LTagHTTPSuccess = "_com_http_Success"
+	LTagHTTPFailed  = "_com_http_failure"
+	LTagHTTPSuccess = "_com_http_success"
 
-	LTagHTTPSFailed  = "_com_https_Failure"
-	LTagHTTPSSuccess = "_com_https_Success"
+	LTagHTTPSFailed  = "_com_https_failure"
+	LTagHTTPSSuccess = "_com_https_success"
 
-	LTagTCPFailed  = "_com_tcp_Failture"
-	LTagTCPSuccess = "_com_tcp_Success"
+	LTagTCPFailed  = "_com_tcp_failture"
+	LTagTCPSuccess = "_com_tcp_success"
 
-	LTagUDPFailed  = "_com_udp_Failure"
-	LTagUDPSuccess = "_com_udp_Success"
+	LTagUDPFailed  = "_com_udp_failure"
+	LTagUDPSuccess = "_com_udp_success"
 )
 
 const (
@@ -65,16 +66,28 @@ func checkLTag(ltag string) string {
 }
 func parseParams(m map[string]any) string {
 	ltag := LTagUndefined
-	if _ltag, exists := m["ltag"]; exists {
+	if _ltag, exists := m[_lTag]; exists {
 		if __ltag, ok := _ltag.(string); ok {
 			ltag = __ltag
 		}
 	}
-	for k, v := range m {
-		if k == "ltag" {
+	if trace, exists := m[_traceId]; exists {
+		if _trace, ok := trace.(string); ok {
+			ltag += "||traceid=" + _trace
+		}
+	}
+	keys := make([]string, len(m))
+	i := 0
+	for k, _ := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if k == _lTag || k == _traceId {
 			continue
 		}
-		ltag = ltag + "||" + fmt.Sprintf("%v=%+v", k, v)
+		ltag = ltag + "||" + fmt.Sprintf("%v=%+v", k, m[k])
 	}
 	ltag = strings.Trim(fmt.Sprintf("%q", ltag), "\"")
 	return ltag

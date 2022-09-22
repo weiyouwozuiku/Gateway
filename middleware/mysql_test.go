@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"context"
 	"fmt"
 	"gateway/middleware"
 	"testing"
@@ -92,5 +93,35 @@ func Test_DBPool(t *testing.T) {
 }
 
 func Test_GormPool(t *testing.T) {
-
+	SetUp()
+	dbpool, err := middleware.GetGORMPool("default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db := dbpool.Begin()
+	trace := middleware.NewTrace()
+	ctx := context.Background()
+	ctx = middleware.SetTraceContext(ctx, trace)
+	db = db.WithContext(ctx)
+	if err := db.Exec(createTableSQL).Error; err != nil {
+		db.Rollback()
+		t.Fatal(err)
+	}
+	t1 := &Test1{Name: "test_name", CreatedAt: time.Now()}
+	if err := db.Save(t1).Error; err != nil {
+		db.Rollback()
+		t.Fatal(err)
+	}
+	list := []Test1{}
+	if err := db.Where("name=?", "test_name").Find(&list).Error; err != nil {
+		db.Rollback()
+		t.Fatal(err)
+	}
+	fmt.Println(list)
+	if err := db.Exec(dropTableSQL).Error; err != nil {
+		db.Rollback()
+		t.Fatal(err)
+	}
+	db.Commit()
+	TearDown()
 }
