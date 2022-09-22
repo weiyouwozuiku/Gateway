@@ -26,7 +26,7 @@ type RedisMapConf struct {
 }
 
 func InitRedisConf(confName string) error {
-	RedisConfMap := &RedisMapConf{}
+	RedisConfMap = &RedisMapConf{}
 	if err := ParseConfig(confName, RedisConfMap); err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func RedisConnFactory(name string) (redis.Conn, error) {
 	}
 	return nil, errors.New("create redis conn fail")
 }
-func RedisDo(trace *TraceContext, c redis.Conn, commandName string, args ...any) (any, error) {
+func RedisConnDo(trace *TraceContext, c redis.Conn, commandName string, args ...any) (any, error) {
 	startExecTime := time.Now()
 	reply, err := c.Do(commandName, args...)
 	endExecTime := time.Now()
@@ -98,4 +98,35 @@ func RedisDo(trace *TraceContext, c redis.Conn, commandName string, args ...any)
 	}
 	return reply, err
 }
-func 
+func RedisConfDo(trace *TraceContext, name string, commandName string, args ...any) (any, error) {
+	c, err := RedisConnFactory(name)
+	defer c.Close()
+	if err != nil {
+		Log.TagError(trace, LTagRedisFailed, map[string]any{
+			"method": commandName,
+			"err":    errors.New("redisConfFactory_error:" + name),
+			"bind":   args,
+		})
+		return nil, err
+	}
+	startExecTime := time.Now()
+	reply, err := c.Do(commandName, args...)
+	endExecTime := time.Now()
+	if err != nil {
+		Log.TagError(trace, LTagRedisFailed, map[string]any{
+			"method":    commandName,
+			"err":       err,
+			"bind":      args,
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	} else {
+		replyStr, _ := redis.String(reply, nil)
+		Log.TagInfo(trace, LTagRedisSuccess, map[string]any{
+			"method":    commandName,
+			"bind":      args,
+			"reply":     replyStr,
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	}
+	return reply, err
+}

@@ -3,7 +3,7 @@ package middleware_test
 import (
 	"bytes"
 	"fmt"
-	"gateway/middleware"
+	"github.com/weiyouwozuiku/Gateway/middleware"
 	"io/ioutil"
 	"log"
 	"net/http"

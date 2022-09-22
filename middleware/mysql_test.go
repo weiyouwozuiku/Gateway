@@ -3,7 +3,9 @@ package middleware_test
 import (
 	"context"
 	"fmt"
-	"gateway/middleware"
+
+	"github.com/weiyouwozuiku/Gateway/middleware"
+
 	"testing"
 	"time"
 )

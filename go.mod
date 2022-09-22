@@ -1,4 +1,4 @@
-module gateway
+module github.com/weiyouwozuiku/Gateway
 
 go 1.18
 

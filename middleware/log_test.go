@@ -1,7 +1,8 @@
 package middleware_test
 
 import (
-	"gateway/middleware"
+	"github.com/weiyouwozuiku/Gateway/middleware"
+
 	"testing"
 )
 

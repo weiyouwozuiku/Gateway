@@ -2,8 +2,9 @@ package middleware_test
 
 import (
 	"context"
-	"gateway/middleware"
 	"testing"
+
+	"github.com/weiyouwozuiku/Gateway/middleware"
 
 	"github.com/gin-gonic/gin"
 )
