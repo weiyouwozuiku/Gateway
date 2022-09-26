@@ -23,7 +23,7 @@ func Test_LogInstance(t *testing.T) {
 		},
 	}
 	log.SetupLogInstanceWithConf(logConf, mylog)
-	log.Info("test")
-	log.Error("hello")
+	mylog.Info("test")
+	mylog.Error("hello")
 	mylog.Close()
 }

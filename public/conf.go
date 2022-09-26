@@ -2,6 +2,7 @@ package public
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/spf13/viper"
 	"github.com/weiyouwozuiku/Gateway/log"
@@ -80,4 +81,39 @@ func ParseConfig(confName string, conf any) error {
 		value.Unmarshal(conf)
 	}
 	return nil
+}
+func GetStringConf(key string) string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return ""
+	}
+	if v, ok := ViperConfMap[keys[0]]; !ok {
+		return ""
+	} else {
+		return v.GetString(strings.Join(keys[1:], "."))
+	}
+}
+func GetStringSliceConf(key string) []string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return nil
+	}
+	v := ViperConfMap[keys[0]]
+	return v.GetStringSlice(strings.Join(keys[1:], "."))
+}
+func GetIntConf(key string) int {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return 0
+	}
+	v := ViperConfMap[keys[0]]
+	return v.GetInt(strings.Join(keys[1:], "."))
+}
+func IsSetConf(key string) bool {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return false
+	}
+	v := ViperConfMap[keys[0]]
+	return v.IsSet(strings.Join(keys[1:], "."))
 }

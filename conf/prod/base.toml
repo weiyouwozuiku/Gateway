@@ -1,7 +1,7 @@
 # This is base config
 
 [base]
-    debug_mode="debug"
+    debug_mode="release"
     time_location="Asia/Shanghai"
 
 [http]
@@ -36,7 +36,9 @@
     cluster_ssl_port="4433"
 
 [swagger]
-    title="go_gateway swagger API"
+    title="Ggateway swagger API"
     desc="This is a sample server celler server."
     host="127.0.0.1:8880"
     base_path=""
+    version="1.0"
+    schemes=["http","https"]
