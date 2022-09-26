@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"time"
 
+	mylog "github.com/weiyouwozuiku/Gateway/log"
 	"github.com/weiyouwozuiku/Gateway/public"
 	"github.com/weiyouwozuiku/Gateway/server"
 )
@@ -41,7 +41,7 @@ func initModules(configPath string, modules []string) error {
 	// 设置ip信息，优先设置便于日志打印
 	ips := public.GetLocalIPs()
 	if len(ips) > 0 {
-		LocalIP = ips[0]
+		public.LocalIP = ips[0]
 	}
 
 	// 解析配置文件目录，作为整体环境变量
@@ -55,7 +55,7 @@ func initModules(configPath string, modules []string) error {
 	// 加载base配置
 	if public.InArrayString("base", modules) {
 		if err := public.InitBaseConf("base"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitBaseConf:"+err.Error())
 		}
 	}
 
@@ -63,20 +63,20 @@ func initModules(configPath string, modules []string) error {
 	if location, err := time.LoadLocation(public.ConfBase.TimeLocation); err != nil {
 		return err
 	} else {
-		TimeLocation = location
+		public.TimeLocation = location
 	}
 
 	// 加载mysql配置
 	if public.InArrayString("mysql", modules) {
 		if err := server.InitDBConf("mysql"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBConf:"+err.Error())
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitDBConf:"+err.Error())
 		}
 	}
 
 	// 加载redis配置
 	if public.InArrayString("redis", modules) {
 		if err := server.InitRedisConf("redis"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitRedisConf:"+err.Error())
 		}
 	}
 

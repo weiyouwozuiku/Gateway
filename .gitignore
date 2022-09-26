@@ -17,5 +17,5 @@
 .idea/
 
 conf/dev/*
-log/
+logs/
 middleware/logs/*
