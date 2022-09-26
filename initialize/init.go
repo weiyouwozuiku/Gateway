@@ -12,13 +12,6 @@ import (
 	"github.com/weiyouwozuiku/Gateway/server"
 )
 
-var (
-	TimeLocation *time.Location
-	TimeFormat   = "2006-01-02 15:04:05"
-	DateFormat   = "2006-01-02"
-	LocalIP      = net.ParseIP("127.0.0.1")
-)
-
 func InitModules(path string, modules ...string) error {
 	if path == "" {
 		return errors.New("")

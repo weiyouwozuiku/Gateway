@@ -7,7 +7,6 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/weiyouwozuiku/Gateway/log"
 	"github.com/weiyouwozuiku/Gateway/public"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -19,7 +18,7 @@ var (
 	GORMMapPool            map[string]*gorm.DB
 	DBDefaultPool          *sql.DB
 	GORMDefaultPool        *gorm.DB
-	DefaultMySQLGORMLogger = log.MySQLGORMLogger{
+	DefaultMySQLGORMLogger = MySQLGORMLogger{
 		LogLevel:      logger.Info,
 		SlowThreshold: 200 * time.Millisecond,
 	}
@@ -122,13 +121,13 @@ func DBPoolQuery(trace *public.TraceContext, sqlDB *sql.DB, query string, args .
 	rows, err := sqlDB.Query(query, args...)
 	endExecTime := time.Now()
 	if err != nil {
-		log.Log.TagError(trace, log.LTagMySQLError, map[string]any{
+		public.Log.TagError(trace, public.LTagMySQLError, map[string]any{
 			"sql":       query,
 			"bind":      args,
 			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	} else {
-		log.Log.TagInfo(trace, log.LTagMySQLInfo, map[string]any{
+		public.Log.TagInfo(trace, public.LTagMySQLInfo, map[string]any{
 			"sql":       query,
 			"bind":      args,
 			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),

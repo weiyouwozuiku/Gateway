@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/weiyouwozuiku/Gateway/log"
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
@@ -83,7 +82,7 @@ func RedisConnDo(trace *public.TraceContext, c redis.Conn, commandName string, a
 	reply, err := c.Do(commandName, args...)
 	endExecTime := time.Now()
 	if err != nil {
-		log.Log.TagError(trace, log.LTagRedisFailed, map[string]any{
+		public.Log.TagError(trace, public.LTagRedisFailed, map[string]any{
 			"method":    commandName,
 			"err":       err,
 			"bind":      args,
@@ -91,7 +90,7 @@ func RedisConnDo(trace *public.TraceContext, c redis.Conn, commandName string, a
 		})
 	} else {
 		replyStr, _ := redis.String(reply, nil)
-		log.Log.TagInfo(trace, log.LTagRedisSuccess, map[string]any{
+		public.Log.TagInfo(trace, public.LTagRedisSuccess, map[string]any{
 			"method":    commandName,
 			"bind":      args,
 			"reply":     replyStr,
@@ -104,7 +103,7 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 	c, err := RedisConnFactory(name)
 	defer c.Close()
 	if err != nil {
-		log.Log.TagError(trace, log.LTagRedisFailed, map[string]any{
+		public.Log.TagError(trace, public.LTagRedisFailed, map[string]any{
 			"method": commandName,
 			"err":    errors.New("redisConfFactory_error:" + name),
 			"bind":   args,
@@ -115,7 +114,7 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 	reply, err := c.Do(commandName, args...)
 	endExecTime := time.Now()
 	if err != nil {
-		log.Log.TagError(trace, log.LTagRedisFailed, map[string]any{
+		public.Log.TagError(trace, public.LTagRedisFailed, map[string]any{
 			"method":    commandName,
 			"err":       err,
 			"bind":      args,
@@ -123,7 +122,7 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 		})
 	} else {
 		replyStr, _ := redis.String(reply, nil)
-		log.Log.TagInfo(trace, log.LTagRedisSuccess, map[string]any{
+		public.Log.TagInfo(trace, public.LTagRedisSuccess, map[string]any{
 			"method":    commandName,
 			"bind":      args,
 			"reply":     replyStr,

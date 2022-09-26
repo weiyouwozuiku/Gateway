@@ -9,8 +9,6 @@ import (
 	"net"
 	"os"
 	"time"
-
-	"github.com/weiyouwozuiku/Gateway/initialize"
 )
 
 type OpenTrace struct {
@@ -41,11 +39,11 @@ func calcTraceId(ip string) string {
 	return b.String()
 }
 func GetTraceId() string {
-	return calcTraceId(initialize.LocalIP.String())
+	return calcTraceId(LocalIP.String())
 }
 func NewSpanId() string {
 	timestamp := uint32(time.Now().Unix())
-	ipToLong := binary.BigEndian.Uint32(initialize.LocalIP.To4())
+	ipToLong := binary.BigEndian.Uint32(LocalIP.To4())
 	b := bytes.Buffer{}
 	b.WriteString(fmt.Sprintf("%08x", ipToLong^timestamp))
 	b.WriteString(fmt.Sprintf("%08x", rand.Int31()))
