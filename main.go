@@ -11,7 +11,10 @@ import (
 )
 
 func main() {
-	initialize.InitModules("../conf/dev/")
+	if err := initialize.InitModules("./conf/dev/"); err != nil {
+		initialize.Destory()
+		fmt.Println(err)
+	}
 	defer initialize.Destory()
 	router.HttpServerRun()
 	quit := make(chan os.Signal, 1)
