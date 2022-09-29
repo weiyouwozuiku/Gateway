@@ -17,6 +17,15 @@ const (
 	UndefErrorCode
 	ValidErrorCode
 	InternalErrorCode
+
+	InvalidRequestErrorCode ResponseCode = 401
+	CustomizeCode           ResponseCode = 1000
+
+	InvalidParamsCode       ResponseCode = 2000
+	GetGormPoolFailed       ResponseCode = 2001
+	GROUPALL_SAVE_FLOWERROR ResponseCode = 2002
+	AdminLoginFailed        ResponseCode = 2003
+	SessionParseFailed      ResponseCode = 2004
 )
 
 type Response struct {
@@ -28,7 +37,7 @@ type Response struct {
 }
 
 func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
-	trace, _ := ctx.Get("trace")
+	trace, _ := ctx.Get(public.TraceKey)
 	traceContext, _ := trace.(*public.TraceContext)
 	traceId := ""
 	if traceContext != nil {
@@ -51,8 +60,7 @@ func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 	ctx.AbortWithError(http.StatusOK, err)
 }
 func ResponseSuccess(ctx *gin.Context, data any) {
-
-	trace, _ := ctx.Get("trace")
+	trace, _ := ctx.Get(public.TraceKey)
 	traceContext, _ := trace.(*public.TraceContext)
 	traceId := ""
 	if traceContext != nil {

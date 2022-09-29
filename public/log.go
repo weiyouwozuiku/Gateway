@@ -5,11 +5,14 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/log"
 )
 
 const (
 	LTagUndefined = "_undef"
+	LTagPanic     = "_com_panic"
+	LTagRequestIn = "_com_request_in"
 
 	LTagMySQLFailed  = "_com_mysql_failure"
 	LTagMySQLSuccess = "_com_mysql_success"
@@ -132,4 +135,12 @@ func (l *TagLogger) TagError(trace *TraceContext, ltag string, m map[string]any)
 	m[_childSpanId] = trace.CSpanId
 	m[_spanId] = trace.SpanId
 	log.Error(parseParams(m))
+}
+func ComLogWarning(ctx *gin.Context, ltag string, m map[string]any) {
+	traceContext := GetTraceContext(ctx)
+	Log.TagError(traceContext, ltag, m)
+}
+func ComLogNotice(ctx *gin.Context, ltag string, m map[string]any) {
+	traceContext := GetTraceContext(ctx)
+	Log.TagInfo(traceContext, ltag, m)
 }

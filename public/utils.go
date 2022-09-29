@@ -1,6 +1,9 @@
 package public
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -33,7 +36,6 @@ func ParseConfPath(config string) {
 	ConfEnvPath = strings.Join(path[:len(path)-1], "/")
 	ConfEnv = path[len(path)-2]
 }
-
 func InitViperConf() error {
 	f, err := os.Open(ConfEnvPath + "/")
 	if err != nil {
@@ -68,7 +70,6 @@ func InitViperConf() error {
 	}
 	return nil
 }
-
 func InArrayString(s string, arr []string) bool {
 	for _, i := range arr {
 		if s == i {
@@ -79,4 +80,24 @@ func InArrayString(s string, arr []string) bool {
 }
 func GetConfPath(fileName string) string {
 	return ConfEnvPath + "/" + fileName + ".toml"
+}
+func GetSaltPasswd(salt, passwd string) string {
+	s1 := sha256.New()
+	s1.Write([]byte(passwd))
+	str1 := fmt.Sprintf("%x", s1.Sum(nil))
+	s2 := sha256.New()
+	s2.Write([]byte(str1 + salt))
+	return fmt.Sprintf("%x", s2.Sum(nil))
+}
+func Obj2Json(s any) string {
+	bts, _ := json.Marshal(s)
+	return string(bts)
+}
+func InStringSlice(slice []string, str string) bool {
+	for _, item := range slice {
+		if str == item {
+			return true
+		}
+	}
+	return false
 }
