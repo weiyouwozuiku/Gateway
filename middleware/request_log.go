@@ -9,7 +9,7 @@ import (
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
-func RequestInLog(ctx *gin.Context) {
+func requestInLog(ctx *gin.Context) {
 	traceContext := public.NewTrace()
 	if traceId := ctx.Request.Header.Get("com-header-rid"); traceId != "" {
 		traceContext.TraceId = traceId
@@ -26,4 +26,27 @@ func RequestInLog(ctx *gin.Context) {
 		"method": ctx.Request.Method,
 		"args":   ctx.Request.PostForm,
 	})
+}
+func requestOutLog(ctx *gin.Context) {
+	endExecTime := time.Now()
+	response, _ := ctx.Get("response")
+	st, _ := ctx.Get("startExecTime")
+	startExecTime, _ := st.(time.Time)
+	public.ComLogNotice(ctx, public.LTagRequestOut, map[string]any{
+		"uri":       ctx.Request.RequestURI,
+		"method":    ctx.Request.Method,
+		"args":      ctx.Request.PostForm,
+		"from":      ctx.ClientIP(),
+		"response":  response,
+		"proc_time": endExecTime.Sub(startExecTime).Seconds(),
+	})
+}
+func RequestLog() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if public.GetBoolConf("base.log.file_writer.on") {
+			requestInLog(ctx)
+			defer requestOutLog(ctx)
+		}
+		ctx.Next()
+	}
 }

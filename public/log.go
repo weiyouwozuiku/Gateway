@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	LTagUndefined = "_undef"
-	LTagPanic     = "_com_panic"
-	LTagRequestIn = "_com_request_in"
+	LTagUndefined  = "_undef"
+	LTagPanic      = "_com_panic"
+	LTagRequestIn  = "_com_request_in"
+	LTagRequestOut = "_com_request_out"
 
 	LTagMySQLFailed  = "_com_mysql_failure"
 	LTagMySQLSuccess = "_com_mysql_success"

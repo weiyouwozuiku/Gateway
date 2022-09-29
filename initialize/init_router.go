@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/weiyouwozuiku/Gateway/controller"
 	"github.com/weiyouwozuiku/Gateway/docs"
 	"github.com/weiyouwozuiku/Gateway/middleware"
 	"github.com/weiyouwozuiku/Gateway/public"
@@ -43,7 +44,11 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	adminLoginRouter.Use(
 		sessions.Sessions("mysession", store),
 		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.ValidtorMiddleware(),
 	)
+	controller.AdminLoginRegister(adminLoginRouter)
+
 	// TODO 后续增加router
 	return router
 }

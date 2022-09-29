@@ -1,14 +1,22 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/weiyouwozuiku/Gateway/initialize"
+	"github.com/weiyouwozuiku/Gateway/router"
+)
 
 func main() {
-	r := gin.Default()
-	// 定义一个路径为 /ping 的 GET 格式路由，并返回 JSON 数据
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello, World !",
-		})
-	})
-	r.Run(":8088") // 启动服务，并监听 8080 端口
+	initialize.InitModules("../conf/dev/")
+	defer initialize.Destory()
+	router.HttpServerRun()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-quit
+	fmt.Println("Got signal:", sig)
+	router.HttpServerStop()
 }

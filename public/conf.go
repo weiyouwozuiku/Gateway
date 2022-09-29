@@ -117,3 +117,11 @@ func IsSetConf(key string) bool {
 	v := ViperConfMap[keys[0]]
 	return v.IsSet(strings.Join(keys[1:], "."))
 }
+func GetBoolConf(key string) bool {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
+		return false
+	}
+	v := ViperConfMap[keys[0]]
+	return v.GetBool(strings.Join(keys[1:], "."))
+}
