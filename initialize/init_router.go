@@ -20,7 +20,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	docs.SwaggerInfo.Host = public.GetStringConf("base.swagger.host")
 	docs.SwaggerInfo.BasePath = public.GetStringConf("base.swagger.base_path")
 	docs.SwaggerInfo.Version = public.GetStringConf("base.swagger.version")
-	docs.SwaggerInfo.Schemes = public.GetStringSliceConf("base.wagger.schemes")
+	docs.SwaggerInfo.Schemes = public.GetStringSliceConf("base.swagger.schemes")
 
 	var router *gin.Engine
 	if public.ConfBase.DebugMode == "debug" {

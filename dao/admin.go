@@ -25,6 +25,7 @@ func (ad *Admin) TableName() string {
 }
 func (ad *Admin) Find(ctx *gin.Context, db *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
+	db = db.WithContext(ctx)
 	if err := db.Where(search).Find(out).Error; err != nil {
 		return nil, err
 	}
