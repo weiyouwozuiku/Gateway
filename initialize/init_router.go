@@ -29,13 +29,16 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		router = gin.New()
 	}
 	router.Use(middlewares...)
+
+	// 探活接口
 	router.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "hello world!",
 		})
 	})
+	// swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	// admin_login
 	adminLoginRouter := router.Group("/admin_login")
 	store, err := sessions.NewRedisStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), []byte("secret"))
 	if err != nil {
@@ -48,7 +51,16 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		middleware.ValidtorMiddleware(),
 	)
 	controller.AdminLoginRegister(adminLoginRouter)
-
+	// admin
+	adminRouter := router.Group("/admin")
+	adminRouter.Use(
+		sessions.Sessions("sessionId", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.ValidtorMiddleware(),
+	)
+	controller.AdminRegister(adminRouter)
 	// TODO 后续增加router
 	return router
 }
