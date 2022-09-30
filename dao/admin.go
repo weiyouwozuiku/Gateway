@@ -25,8 +25,7 @@ func (ad *Admin) TableName() string {
 }
 func (ad *Admin) Find(ctx *gin.Context, db *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
-	db = db.WithContext(ctx)
-	if err := db.Where(search).Find(out).Error; err != nil {
+	if err := db.WithContext(ctx).Where(search).Find(out).Error; err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -36,9 +35,12 @@ func (ad *Admin) Login(ctx *gin.Context, db *gorm.DB, param *dto.AdminLoginInput
 	if err != nil {
 		return nil, errors.New("用户信息不存在")
 	}
-	saltPassword := public.GetSaltPasswd(adminInfo.Salt, param.Password)
+	saltPassword := public.GenSaltPasswd(adminInfo.Salt, param.Password)
 	if adminInfo.Password != saltPassword {
 		return nil, errors.New("密码错误，请重新输入")
 	}
 	return adminInfo, nil
+}
+func (ad *Admin) Save(ctx *gin.Context, tx *gorm.DB) error {
+	return tx.WithContext(ctx).Save(ad).Error
 }

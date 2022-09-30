@@ -19,7 +19,7 @@ func HttpServerRun() {
 	if public.IsSetConf("base.base.debug_mode") {
 		gin.SetMode(public.GetStringConf("base.base.debug_mode"))
 	} else {
-		gin.SetMode("release")
+		gin.SetMode(gin.ReleaseMode)
 	}
 	r := initialize.InitRouter()
 	HttpSrvHandler = &http.Server{

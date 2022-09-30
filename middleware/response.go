@@ -26,6 +26,8 @@ const (
 	GROUPALL_SAVE_FLOWERROR ResponseCode = 2002
 	AdminLoginFailed        ResponseCode = 2003
 	SessionParseFailed      ResponseCode = 2004
+	GormQueryFailed         ResponseCode = 2005
+	GormSaveFailed          ResponseCode = 2006
 )
 
 type Response struct {

@@ -81,7 +81,7 @@ func InArrayString(s string, arr []string) bool {
 func GetConfPath(fileName string) string {
 	return ConfEnvPath + "/" + fileName + ".toml"
 }
-func GetSaltPasswd(salt, passwd string) string {
+func GenSaltPasswd(salt, passwd string) string {
 	s1 := sha256.New()
 	s1.Write([]byte(passwd))
 	str1 := fmt.Sprintf("%x", s1.Sum(nil))
