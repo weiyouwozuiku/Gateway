@@ -42,7 +42,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		log.Fatalf("sessions.NewRedisStore err:%v", err)
 	}
 	adminLoginRouter.Use(
-		sessions.Sessions("mysession", store),
+		sessions.Sessions("sessionId", store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.ValidtorMiddleware(),

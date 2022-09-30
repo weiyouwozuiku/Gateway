@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/public"
 )
@@ -14,7 +16,10 @@ func IPAuthMiddleware() gin.HandlerFunc {
 			}
 		}
 		if !isMatched {
-
+			ResponseError(ctx, InternalErrorCode, fmt.Errorf("%v, not in iplist", ctx.ClientIP()))
+			ctx.Abort()
+			return
 		}
+		ctx.Next()
 	}
 }
