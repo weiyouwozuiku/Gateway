@@ -61,6 +61,8 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 		return
 	}
 	sess := sessions.Default(ctx)
+	// session一天过期
+	sess.Options(sessions.Options{MaxAge: 24 * 60 * 60})
 	sess.Set(public.AdminSessionInfoKey, string(sessBts))
 	err = sess.Save()
 	if err != nil {
