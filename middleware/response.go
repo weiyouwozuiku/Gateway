@@ -28,6 +28,7 @@ const (
 	SessionParseFailed      ResponseCode = 2004
 	GormQueryFailed         ResponseCode = 2005
 	GormSaveFailed          ResponseCode = 2006
+	SessionOptFailed        ResponseCode = 2207
 )
 
 type Response struct {

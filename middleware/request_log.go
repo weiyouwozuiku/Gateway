@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +19,8 @@ func requestInLog(ctx *gin.Context) {
 	}
 	ctx.Set("startExecTime", time.Now())
 	ctx.Set("trace", traceContext)
-	bodyBytes, _ := ioutil.ReadAll(ctx.Request.Body)
-	ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	bodyBytes, _ := io.ReadAll(ctx.Request.Body)
+	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	public.Log.TagInfo(traceContext, public.LTagRequestIn, map[string]any{
 		"uri":    ctx.Request.RequestURI,
 		"method": ctx.Request.Method,

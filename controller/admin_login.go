@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/gin-gonic/contrib/sessions"
@@ -61,7 +62,11 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 	}
 	sess := sessions.Default(ctx)
 	sess.Set(public.AdminSessionInfoKey, string(sessBts))
-	sess.Save()
+	err = sess.Save()
+	if err != nil {
+		middleware.ResponseError(ctx, middleware.SessionOptFailed, errors.New("session保存失败"))
+		return
+	}
 	out := &dto.AdminLoginOutput{Token: admin.UserName}
 	middleware.ResponseSuccess(ctx, out)
 }
@@ -77,7 +82,15 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 // @Router /admin_login/logout [get]
 func (ad *AdminLoginController) AdminLoginOut(ctx *gin.Context) {
 	sess := sessions.Default(ctx)
+	if info := sess.Get(public.AdminSessionInfoKey); info == nil {
+		middleware.ResponseError(ctx, middleware.AdminLoginFailed, errors.New("当前用户未登录"))
+		return
+	}
 	sess.Delete(public.AdminSessionInfoKey)
-	sess.Save()
+	err := sess.Save()
+	if err != nil {
+		middleware.ResponseError(ctx, middleware.SessionOptFailed, errors.New("session保存失败"))
+		return
+	}
 	middleware.ResponseSuccess(ctx, "退出成功")
 }

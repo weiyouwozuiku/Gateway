@@ -3,7 +3,7 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -40,8 +40,8 @@ func TestPost(t *testing.T) {
 func InitTestServer() {
 	serverOnce.Do(func() {
 		http.HandleFunc("/postjson", func(w http.ResponseWriter, r *http.Request) {
-			bodyBytes, _ := ioutil.ReadAll(r.Body)
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+			bodyBytes, _ := io.ReadAll(r.Body)
+			r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 			w.Write([]byte(bodyBytes))
 		})
 		http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
