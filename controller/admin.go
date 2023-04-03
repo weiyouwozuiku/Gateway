@@ -16,7 +16,9 @@ import (
 type AdminController struct{}
 
 func AdminRegister(group *gin.RouterGroup) {
-
+	adminLogin := &AdminController{}
+	group.GET("/admin_info", adminLogin.AdminInfo)
+	group.POST("/change_pwd", adminLogin.ChangePwd)
 }
 
 // AdminInfo godoc
@@ -80,7 +82,7 @@ func (ad *AdminController) ChangePwd(ctx *gin.Context) {
 		return
 	}
 	adminInfo := &dao.Admin{}
-	adminInfo, err = adminInfo.Find(ctx, tx, &dao.Admin{UserName: adminInfo.UserName})
+	adminInfo, err = adminInfo.Find(ctx, tx, &dao.Admin{UserName: adminSessionInfo.UserName})
 	if err != nil {
 		middleware.ResponseError(ctx, middleware.GormQueryFailed, err)
 		return

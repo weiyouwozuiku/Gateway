@@ -12,7 +12,7 @@ type ServiceController struct{}
 
 func ServiceRegister(group *gin.RouterGroup) {
 	service := ServiceController{}
-
+	group.GET("/service_list", service.ServiceList)
 }
 
 // ServiceList godoc

@@ -75,5 +75,5 @@ func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, serInfo *S
 
 	}
 	pluginConf:=simplejson.New()
-	if tmp,err:=simplejson.NewJson([]byte(serInfo.P))
+	if tmp,err:=simplejson.NewJson([]byte(serInfo.))
 }
