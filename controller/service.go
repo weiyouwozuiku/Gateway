@@ -48,6 +48,15 @@ func (service *ServiceController) ServiceList(ctx *gin.Context) {
 	// 2. 格式化输出
 	outList := []dto.ServiceListItemOutput{}
 	for _, listItem := range list {
-		serviceDetail, err := listItem.Ser
+		outItem := dto.ServiceListItemOutput{
+			ID:          listItem.ID,
+			ServiceName: listItem.ServiceName,
+			ServiceDesc: listItem.ServiceDesc,
+		}
+		outList = append(outList, outItem)
+	}
+	out := &dto.ServiceListOutput{
+		Total: total,
+		List:  outList,
 	}
 }
