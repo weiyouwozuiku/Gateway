@@ -57,6 +57,58 @@ func (info *ServiceInfo) PageList(ctx *gin.Context, tx *gorm.DB, param *dto.Serv
 	query.Count(&total)
 	return list, total, nil
 }
+
+func findRule[T HttpRule | TcpRule | GrpcRule](ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- T) {
+	var err error
+	rule := &T{ServiceID: searchId}
+	rule, err = rule.Find(ctx, tx, rule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		resultChan <- err
+	} else {
+		resultChan <- rule
+	}
+}
+func findTcpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+	var err error
+	tcpRule := &TcpRule{ServiceID: searchId}
+	tcpRule, err = tcpRule.Find(ctx, tx, tcpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		resultChan <- err
+	} else {
+		resultChan <- tcpRule
+	}
+}
+func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+	var err error
+	httpRule := &HttpRule{ServiceID: searchId}
+	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		resultChan <- err
+	} else {
+		resultChan <- httpRule
+	}
+}
+func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+	var err error
+	httpRule := &HttpRule{ServiceID: searchId}
+	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		resultChan <- err
+	} else {
+		resultChan <- httpRule
+	}
+}
+func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+	var err error
+	httpRule := &HttpRule{ServiceID: searchId}
+	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		resultChan <- err
+	} else {
+		resultChan <- httpRule
+	}
+}
+
 func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
 	var err error
 	if search.ServiceName == "" {
@@ -66,11 +118,9 @@ func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *Se
 		}
 		search = info
 	}
-	httpRule := &HttpRule{ServiceID: search.ID}
-	httpRule, err = httpRule.Find(ctx, tx, httpRule)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
+
+	resultChan := make(chan any, 5)
+
 	tcpRule := &TcpRule{ServiceID: search.ID}
 	tcpRule, err = tcpRule.Find(ctx, tx, tcpRule)
 	if err != nil && err != gorm.ErrRecordNotFound {
