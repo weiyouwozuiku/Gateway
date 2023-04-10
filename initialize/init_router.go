@@ -17,6 +17,8 @@ import (
 
 var SessionKey = []byte("secret")
 
+const AdminSession = "adminSession"
+
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	docs.SwaggerInfo.Title = public.GetStringConf("base.swagger.title")
 	docs.SwaggerInfo.Description = public.GetStringConf("base.swagger.desc")
@@ -55,7 +57,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	adminLoginRouter := router.Group("/admin_login")
 
 	adminLoginRouter.Use(
-		sessions.Sessions(public.AdminSessionInfoKey, store),
+		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.ValidtorMiddleware(),
@@ -67,7 +69,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	// admin
 	adminRouter := router.Group("/admin")
 	adminRouter.Use(
-		sessions.Sessions(public.AdminSessionInfoKey, store),
+		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
@@ -79,7 +81,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 	serviceRouter := router.Group("/service")
 	serviceRouter.Use(
-		sessions.Sessions(public.AdminSessionInfoKey, store),
+		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
