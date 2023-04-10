@@ -2,7 +2,6 @@ package dao
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/weiyouwozuiku/Gateway/public"
 	"gorm.io/gorm"
 )
 

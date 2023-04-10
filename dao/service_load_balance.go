@@ -3,6 +3,7 @@ package dao
 import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type LoadBalance struct {
@@ -35,4 +36,7 @@ func (t *LoadBalance) Save(ctx *gin.Context, tx *gorm.DB) error {
 		return err
 	}
 	return nil
+}
+func (t *LoadBalance) GetIpListByModel() []string {
+	return strings.Split(t.WeightList, ",")
 }

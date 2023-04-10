@@ -33,7 +33,11 @@ func (ad *Admin) Find(ctx *gin.Context, db *gorm.DB, search *Admin) (*Admin, err
 func (ad *Admin) Login(ctx *gin.Context, db *gorm.DB, param *dto.AdminLoginInput) (*Admin, error) {
 	adminInfo, err := ad.Find(ctx, db, &Admin{UserName: param.Username, IsDelete: 0})
 	if err != nil {
-		return nil, errors.New("用户信息不存在")
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("用户信息不存在")
+		} else {
+			return nil, err
+		}
 	}
 	saltPassword := public.GenSaltPasswd(adminInfo.Salt, param.Password)
 	if adminInfo.Password != saltPassword {

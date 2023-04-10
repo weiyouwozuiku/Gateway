@@ -14,6 +14,10 @@ import (
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
+var SessionKey = []byte("secret")
+
+const AdminSession = "adminSession"
+
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	docs.SwaggerInfo.Title = public.GetStringConf("base.swagger.title")
 	docs.SwaggerInfo.Description = public.GetStringConf("base.swagger.desc")
@@ -30,6 +34,12 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	}
 	router.Use(middlewares...)
 
+	// 登录session存放redis
+	store, err := sessions.NewRedisStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), SessionKey)
+	if err != nil {
+		log.Fatalf("sessions.NewRedisStore err:%v", err)
+	}
+
 	// 探活接口
 	router.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -42,27 +52,40 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 	// admin_login
 	adminLoginRouter := router.Group("/admin_login")
-	store, err := sessions.NewRedisStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), []byte("secret"))
-	if err != nil {
-		log.Fatalf("sessions.NewRedisStore err:%v", err)
-	}
+
 	adminLoginRouter.Use(
-		sessions.Sessions("sessionId", store),
+		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.ValidtorMiddleware(),
 	)
-	controller.AdminLoginRegister(adminLoginRouter)
+	{
+		controller.AdminLoginRegister(adminLoginRouter)
+	}
+
 	// admin
 	adminRouter := router.Group("/admin")
 	adminRouter.Use(
-		sessions.Sessions("sessionId", store),
+		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
 		middleware.ValidtorMiddleware(),
 	)
-	controller.AdminRegister(adminRouter)
+	{
+		controller.AdminRegister(adminRouter)
+	}
+
+	serviceRouter := router.Group("/service")
+	serviceRouter.Use(
+		sessions.Sessions(AdminSession, store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.ValidtorMiddleware())
+	{
+		controller.ServiceRegister(serviceRouter)
+	}
 	// TODO 后续增加router
 	return router
 }

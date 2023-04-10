@@ -97,7 +97,7 @@ func Test_DBPool(t *testing.T) {
 
 func Test_GormPool(t *testing.T) {
 	SetUp()
-	dbpool, err := server.GetGORMPool("default")
+	dbpool, err := server.GetGORMPool(server.DBDefault)
 	if err != nil {
 		t.Fatal(err)
 	}

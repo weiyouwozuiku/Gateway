@@ -62,6 +62,7 @@ func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 	ctx.Set("response", string(response))
 	ctx.AbortWithError(http.StatusOK, err)
 }
+
 func ResponseSuccess(ctx *gin.Context, data any) {
 	trace, _ := ctx.Get(public.TraceKey)
 	traceContext, _ := trace.(*public.TraceContext)

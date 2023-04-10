@@ -36,6 +36,7 @@ func ParseConfPath(config string) {
 	ConfEnvPath = strings.Join(path[:len(path)-1], "/")
 	ConfEnv = path[len(path)-2]
 }
+
 func InitViperConf() error {
 	f, err := os.Open(ConfEnvPath + "/")
 	if err != nil {

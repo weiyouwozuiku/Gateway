@@ -76,7 +76,7 @@ func (ad *AdminController) ChangePwd(ctx *gin.Context) {
 		return
 	}
 	// 2. sessInfo.ID读取数据库信息 adminInfo
-	tx, err := server.GetGORMPool("default")
+	tx, err := server.GetGORMPool(server.DBDefault)
 	if err != nil {
 		middleware.ResponseError(ctx, middleware.GetGormPoolFailed, err)
 		return

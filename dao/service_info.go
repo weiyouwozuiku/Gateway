@@ -1,14 +1,10 @@
 package dao
 
 import (
-	"fmt"
-	"sync"
 	"time"
 
-	"github.com/bitly/go-simplejson"
 	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/dto"
-	"github.com/weiyouwozuiku/Gateway/public"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +40,7 @@ func (info *ServiceInfo) Delete(ctx *gin.Context, tx *gorm.DB, search *ServiceIn
 }
 func (info *ServiceInfo) PageList(ctx *gin.Context, tx *gorm.DB, param *dto.ServiceListInput) ([]ServiceInfo, int64, error) {
 	total := int64(0)
-	list := []ServiceInfo{}
+	var list []ServiceInfo
 	offset := (param.PageNo - 1) * param.PageSize
 	query := tx.WithContext(ctx)
 	query = query.Table(info.TableName()).Where("is_delete=0")
@@ -58,59 +54,57 @@ func (info *ServiceInfo) PageList(ctx *gin.Context, tx *gorm.DB, param *dto.Serv
 	return list, total, nil
 }
 
-func findRule[T HttpRule | TcpRule | GrpcRule](ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- T) {
+func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
 	var err error
-	rule := &T{ServiceID: searchId}
-	rule, err = rule.Find(ctx, tx, rule)
+	item := &HttpRule{ServiceID: searchId}
+	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		resultChan <- err
 	} else {
-		resultChan <- rule
+		resultChan <- item
 	}
 }
 func findTcpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
 	var err error
-	tcpRule := &TcpRule{ServiceID: searchId}
-	tcpRule, err = tcpRule.Find(ctx, tx, tcpRule)
+	item := &TcpRule{ServiceID: searchId}
+	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		resultChan <- err
 	} else {
-		resultChan <- tcpRule
+		resultChan <- item
 	}
 }
-func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findGrpcRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
 	var err error
-	httpRule := &HttpRule{ServiceID: searchId}
-	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	item := &GrpcRule{ServiceID: searchId}
+	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		resultChan <- err
 	} else {
-		resultChan <- httpRule
+		resultChan <- item
 	}
 }
-func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findAccess(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
 	var err error
-	httpRule := &HttpRule{ServiceID: searchId}
-	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	item := &AccessControl{ServiceID: searchId}
+	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		resultChan <- err
 	} else {
-		resultChan <- httpRule
+		resultChan <- item
 	}
 }
-func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findLoad(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
 	var err error
-	httpRule := &HttpRule{ServiceID: searchId}
-	httpRule, err = httpRule.Find(ctx, tx, httpRule)
+	item := &LoadBalance{ServiceID: searchId}
+	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		resultChan <- err
 	} else {
-		resultChan <- httpRule
+		resultChan <- item
 	}
 }
-
 func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
-	var err error
 	if search.ServiceName == "" {
 		info, err := info.Find(ctx, tx, search)
 		if err != nil {
@@ -120,35 +114,29 @@ func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *Se
 	}
 
 	resultChan := make(chan any, 5)
+	findHttpRule(ctx, tx, search.ID, resultChan)
+	findTcpRule(ctx, tx, search.ID, resultChan)
+	findGrpcRule(ctx, tx, search.ID, resultChan)
+	findAccess(ctx, tx, search.ID, resultChan)
+	findLoad(ctx, tx, search.ID, resultChan)
 
-	tcpRule := &TcpRule{ServiceID: search.ID}
-	tcpRule, err = tcpRule.Find(ctx, tx, tcpRule)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-	grpcRule := &GrpcRule{ServiceID: search.ID}
-	grpcRule, err = grpcRule.Find(ctx, tx, grpcRule)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-	accessControl := &AccessControl{ServiceID: search.ID}
-	accessControl, err = accessControl.Find(ctx, tx, accessControl)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-	load := &LoadBalance{ServiceID: search.ID}
-	load, err = load.Find(ctx, tx, load)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, err
-	}
-
-	detail := &ServiceDetail{
-		Info:          search,
-		HTTPRule:      httpRule,
-		TCPRule:       tcpRule,
-		GRPCRule:      grpcRule,
-		LoadBalance:   load,
-		AccessControl: accessControl,
+	detail := &ServiceDetail{Info: search}
+	for i := 0; i < 5; i++ {
+		result := <-resultChan
+		switch result.(type) {
+		case *HttpRule:
+			detail.HTTPRule = result.(*HttpRule)
+		case *TcpRule:
+			detail.TCPRule = result.(*TcpRule)
+		case *GrpcRule:
+			detail.GRPCRule = result.(*GrpcRule)
+		case *LoadBalance:
+			detail.LoadBalance = result.(*LoadBalance)
+		case *AccessControl:
+			detail.AccessControl = result.(*AccessControl)
+		case error:
+			return nil, result.(error)
+		}
 	}
 	return detail, nil
 }

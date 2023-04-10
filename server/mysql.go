@@ -24,6 +24,8 @@ var (
 	}
 )
 
+const DBDefault = "default"
+
 type MySQLConf struct {
 	DriverName      string `mapstructure:"driver_name"`
 	DataSourceName  string `mapstructure:"data_source_name"`
@@ -79,10 +81,10 @@ func InitDBConf(confName string) error {
 		GORMMapPool[k] = gormDB
 	}
 	// 配置默认数据库连接池
-	if db, err := GetDBPool("default"); err != nil {
+	if db, err := GetDBPool(DBDefault); err != nil {
 		DBDefaultPool = db
 	}
-	if db, err := GetGORMPool("default"); err != nil {
+	if db, err := GetGORMPool(DBDefault); err != nil {
 		GORMDefaultPool = db
 	}
 	return nil

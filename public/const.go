@@ -6,13 +6,6 @@ const (
 	TraceKey            = "trace"
 	AdminSessionInfoKey = "AdminSessionInfoKey"
 
-	LoadTypeHTTP = 0
-	LoadTypeTCP  = 1
-	LoadTypeGRPC = 2
-
-	HTTPRuleTypePrefixURL = 0
-	HTTPRuleTypeDomain    = 1
-
 	RedisFlowDayKey  = "flow_day_count"
 	RedisFlowHourKey = "flow_hour_count"
 )
@@ -23,4 +16,14 @@ var (
 		LoadTypeTCP:  "TCP",
 		LoadTypeGRPC: "GRPC",
 	}
+)
+
+const (
+	LoadTypeHTTP = iota
+	LoadTypeTCP
+	LoadTypeGRPC
+)
+const (
+	HTTPRuleTypePrefixURL = iota
+	HTTPRuleTypeDomain
 )

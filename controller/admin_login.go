@@ -39,7 +39,7 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 		return
 	}
 	// 1. params.UserName获取管理员信息
-	db, err := server.GetGORMPool("default")
+	db, err := server.GetGORMPool(server.DBDefault)
 	if err != nil {
 		middleware.ResponseError(ctx, middleware.GetGormPoolFailed, err)
 	}
