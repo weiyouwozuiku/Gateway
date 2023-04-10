@@ -22,14 +22,14 @@ func AdminRegister(group *gin.RouterGroup) {
 }
 
 // AdminInfo godoc
-// @Summary 管理员信息
+// @Summary     管理员信息
 // @Description 管理员信息
-// @Tags 管理员接口
-// @ID /admin/admin_info
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} middleware.Response{data=dto.AdminInfoOutput} "success"
-// @Router /admin/admin_info [get]
+// @Tags        管理员接口
+// @ID          /admin/admin_info
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} middleware.Response{data=dto.AdminInfoOutput} "success"
+// @Router      /admin/admin_info [get]
 func (ad *AdminController) AdminInfo(ctx *gin.Context) {
 	sess := sessions.Default(ctx)
 	sessInfo := sess.Get(public.AdminSessionInfoKey)
@@ -52,15 +52,15 @@ func (ad *AdminController) AdminInfo(ctx *gin.Context) {
 }
 
 // ChangePwd godoc
-// @Summary 修改密码
+// @Summary     修改密码
 // @Description 修改密码
-// @Tags 管理员接口
-// @ID /admin/change_pwd
-// @Accept  json
-// @Produce  json
-// @Param body body dto.ChangePwdInput true "body"
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /admin/change_pwd [post]
+// @Tags        管理员接口
+// @ID          /admin/change_pwd
+// @Accept      json
+// @Produce     json
+// @Param       body body     dto.ChangePwdInput               true "body"
+// @Success     200  {object} middleware.Response{data=string} "success"
+// @Router      /admin/change_pwd [post]
 func (ad *AdminController) ChangePwd(ctx *gin.Context) {
 	param := &dto.ChangePwdInput{}
 	if err := param.BindValidParam(ctx); err != nil {

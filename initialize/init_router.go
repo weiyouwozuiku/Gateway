@@ -1,9 +1,7 @@
 package initialize
 
 import (
-	"log"
-	"net/http"
-
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -12,6 +10,8 @@ import (
 	"github.com/weiyouwozuiku/Gateway/docs"
 	"github.com/weiyouwozuiku/Gateway/middleware"
 	"github.com/weiyouwozuiku/Gateway/public"
+	"log"
+	"net/http"
 )
 
 var SessionKey = []byte("secret")
@@ -32,6 +32,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	} else {
 		router = gin.New()
 	}
+
+	router.Use(cors.Default())
 	router.Use(middlewares...)
 
 	// 登录session存放redis

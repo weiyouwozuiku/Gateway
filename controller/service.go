@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/dao"
 	"github.com/weiyouwozuiku/Gateway/dto"
@@ -18,17 +19,17 @@ func ServiceRegister(group *gin.RouterGroup) {
 }
 
 // ServiceList godoc
-// @Summary 服务列表
+// @Summary     服务列表
 // @Description 服务列表
-// @Tags 服务管理
-// @ID /service/service_list
-// @Accept  json
-// @Produce  json
-// @Param info query string false "关键词"
-// @Param page_size query int true "每页个数"
-// @Param page_no query int true "当前页数"
-// @Success 200 {object} middleware.Response{data=dto.ServiceListOutput} "success"
-// @Router /service/service_list [get]
+// @Tags        服务管理
+// @ID          /service/service_list
+// @Accept      json
+// @Produce     json
+// @Param       info      query    string                                          false "关键词"
+// @Param       page_size query    int                                             true  "每页个数"
+// @Param       page_no   query    int                                             true  "当前页数"
+// @Success     200       {object} middleware.Response{data=dto.ServiceListOutput} "success"
+// @Router      /service/service_list [get]
 func (service *ServiceController) ServiceList(ctx *gin.Context) {
 	param := &dto.ServiceListInput{}
 	if err := param.BindValidParam(ctx); err != nil {
@@ -107,15 +108,15 @@ func (service *ServiceController) ServiceList(ctx *gin.Context) {
 }
 
 // ServiceDelete godoc
-// @Summary 服务删除
+// @Summary     服务删除
 // @Description 服务删除
-// @Tags 服务管理
-// @ID /service/service_delete
-// @Accept  json
-// @Produce  json
-// @Param id query string true "服务ID"
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/service_delete [get]
+// @Tags        服务管理
+// @ID          /service/service_delete
+// @Accept      json
+// @Produce     json
+// @Param       id  query    string                           true "服务ID"
+// @Success     200 {object} middleware.Response{data=string} "success"
+// @Router      /service/service_delete [get]
 func (service *ServiceController) ServiceDelete(c *gin.Context) {
 	params := &dto.ServiceDeleteInput{}
 	if err := params.BindValidParam(c); err != nil {

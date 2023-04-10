@@ -46,8 +46,8 @@ type ServiceListInput struct {
 	PageSize int    `json:"page_size" form:"page_size" comment:"每页条数" example:"20" validate:"required"` //每页条数
 }
 type ServiceListOutput struct {
-	Total int64                   `json:"total" form:"total" comment:"总数" example:"" validate:""` //总数
-	List  []ServiceListItemOutput `json:"list" form:"list" comment:"列表" example:"" validate:""`   //列表
+	Total int64                   `json:"total" form:"total" comment:"总数" example:"0" validate:""` //总数
+	List  []ServiceListItemOutput `json:"list" form:"list" comment:"列表" validate:""`               //列表
 }
 type ServiceListItemOutput struct {
 	ID          int64  `json:"id" form:"id"`                     //id

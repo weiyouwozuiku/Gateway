@@ -23,15 +23,15 @@ func AdminLoginRegister(group *gin.RouterGroup) {
 }
 
 // AdminLogin godoc
-// @Summary 管理员登陆
+// @Summary     管理员登陆
 // @Description 管理员登陆
-// @Tags 管理员接口
-// @ID /admin_login/login
-// @Accept  json
-// @Produce  json
-// @Param body body dto.AdminLoginInput true "body"
-// @Success 200 {object} middleware.Response{data=dto.AdminLoginOutput} "success"
-// @Router /admin_login/login [post]
+// @Tags        管理员接口
+// @ID          /admin_login/login
+// @Accept      json
+// @Produce     json
+// @Param       body body     dto.AdminLoginInput                            true "body"
+// @Success     200  {object} middleware.Response{data=dto.AdminLoginOutput} "success"
+// @Router      /admin_login/login [post]
 func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 	params := &dto.AdminLoginInput{}
 	if err := params.BindValidParam(ctx); err != nil {
@@ -74,14 +74,14 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 }
 
 // AdminLogin godoc
-// @Summary 管理员退出
+// @Summary     管理员退出
 // @Description 管理员退出
-// @Tags 管理员接口
-// @ID /admin_login/logout
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /admin_login/logout [get]
+// @Tags        管理员接口
+// @ID          /admin_login/logout
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} middleware.Response{data=string} "success"
+// @Router      /admin_login/logout [get]
 func (ad *AdminLoginController) AdminLoginOut(ctx *gin.Context) {
 	sess := sessions.Default(ctx)
 	if info := sess.Get(public.AdminSessionInfoKey); info == nil {
