@@ -1,7 +1,8 @@
 package public
 
 import (
-	"errors"
+	"github.com/pkg/errors"
+	"github.com/weiyouwozuiku/Gateway/middleware"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,7 @@ func GetTranslation(ctx *gin.Context) (ut.Translator, error) {
 	}
 	return translator, nil
 }
+
 func DefaultGetValidParams(ctx *gin.Context, params any) error {
 	// 接收参数
 	if err := ctx.ShouldBind(params); err != nil {
@@ -59,4 +61,11 @@ func DefaultGetValidParams(ctx *gin.Context, params any) error {
 		return errors.New(strings.Join(sliceErrs, ","))
 	}
 	return nil
+}
+
+func BindValidParam[T any](ctx *gin.Context, param *T) error {
+	if err := DefaultGetValidParams(ctx, param); err != nil {
+		middleware.ResponseError(ctx, middleware.InvalidParamsCode, err)
+	}
+	return
 }

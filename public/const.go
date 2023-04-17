@@ -1,5 +1,10 @@
 package public
 
+import (
+	"net"
+	"time"
+)
+
 const (
 	ValidtorKey         = "ValidatorKey"
 	TranslatorKey       = "TranslatorKey"
@@ -8,6 +13,10 @@ const (
 
 	RedisFlowDayKey  = "flow_day_count"
 	RedisFlowHourKey = "flow_hour_count"
+
+	FlowTotal         = "flow_total"
+	FlowServicePrefix = "flow_service_"
+	FlowAppPrefix     = "flow_app_"
 )
 
 var (
@@ -27,3 +36,8 @@ const (
 	HTTPRuleTypePrefixURL = iota
 	HTTPRuleTypeDomain
 )
+
+var TimeLocation *time.Location
+var TimeFormat = "2006-01-02 15:04:05"
+var DateFormat = "2006-01-02"
+var LocalIP = net.ParseIP("127.0.0.1")

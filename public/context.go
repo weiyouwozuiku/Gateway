@@ -3,17 +3,8 @@ package public
 import (
 	"context"
 	"errors"
-	"net"
-	"time"
 
 	"github.com/gin-gonic/gin"
-)
-
-var (
-	TimeLocation *time.Location
-	TimeFormat   = "2006-01-02 15:04:05"
-	DateFormat   = "2006-01-02"
-	LocalIP      = net.ParseIP("127.0.0.1")
 )
 
 type TraceContext struct {

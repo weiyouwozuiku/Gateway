@@ -5,7 +5,7 @@ import (
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
-type ServiceAddGRPCInput struct {
+type ServiceAddGrpcInput struct {
 	ServiceName       string `json:"service_name" form:"service_name" comment:"服务名称" validate:"required,valid_service_name"`
 	ServiceDesc       string `json:"service_desc" form:"service_desc" comment:"服务描述" validate:"required"`
 	Port              int    `json:"port" form:"port" comment:"端口，需要设置8001-8999范围内" validate:"required,min=8001,max=8999"`
@@ -21,7 +21,7 @@ type ServiceAddGRPCInput struct {
 	WeightList        string `json:"weight_list" form:"weight_list" comment:"权重列表" validate:"required,valid_weightlist"`
 	ForbidList        string `json:"forbid_list" form:"forbid_list" comment:"禁用IP列表" validate:"valid_iplist"`
 }
-type ServiceUpdateGRPCInput struct {
+type ServiceUpdateGrpcInput struct {
 	ID                int64  `json:"id" form:"id" comment:"服务ID" validate:"required"`
 	ServiceName       string `json:"service_name" form:"service_name" comment:"服务名称" validate:"required,valid_service_name"`
 	ServiceDesc       string `json:"service_desc" form:"service_desc" comment:"服务描述" validate:"required"`
@@ -39,9 +39,9 @@ type ServiceUpdateGRPCInput struct {
 	ForbidList        string `json:"forbid_list" form:"forbid_list" comment:"禁用IP列表" validate:"valid_iplist"`
 }
 
-func (param *ServiceAddGRPCInput) BindValidParam(ctx *gin.Context) error {
+func (param *ServiceAddGrpcInput) BindValidParam(ctx *gin.Context) error {
 	return public.DefaultGetValidParams(ctx, param)
 }
-func (param *ServiceUpdateGRPCInput) BindValidParam(ctx *gin.Context) error {
+func (param *ServiceUpdateGrpcInput) BindValidParam(ctx *gin.Context) error {
 	return public.DefaultGetValidParams(ctx, param)
 }
