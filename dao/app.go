@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weiyouwozuiku/Gateway/dto"
 	"gorm.io/gorm"
 )
 
@@ -37,4 +38,6 @@ func (t *App) Save(c *gin.Context, tx *gorm.DB) error {
 	return nil
 }
 
-func (t *App) AppList(c *gin.Context, tx *gorm.DB, parms *dto.AppList)
+func (t *App) AppList(c *gin.Context, tx *gorm.DB, parms *dto.AppListInput) {
+
+}

@@ -23,6 +23,7 @@ func AdminLoginRegister(group *gin.RouterGroup) {
 }
 
 // AdminLogin godoc
+//
 //	@Summary		管理员登陆
 //	@Description	管理员登陆
 //	@Tags			管理员接口
@@ -35,6 +36,7 @@ func AdminLoginRegister(group *gin.RouterGroup) {
 func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 	params := &dto.AdminLoginInput{}
 	if err := params.BindValidParam(ctx); err != nil {
+
 		middleware.ResponseError(ctx, middleware.InvalidParamsCode, err)
 		return
 	}
@@ -74,6 +76,7 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 }
 
 // AdminLogin godoc
+//
 //	@Summary		管理员退出
 //	@Description	管理员退出
 //	@Tags			管理员接口

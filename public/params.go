@@ -1,9 +1,9 @@
 package public
 
 import (
-	"github.com/pkg/errors"
-	"github.com/weiyouwozuiku/Gateway/middleware"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
@@ -61,11 +61,4 @@ func DefaultGetValidParams(ctx *gin.Context, params any) error {
 		return errors.New(strings.Join(sliceErrs, ","))
 	}
 	return nil
-}
-
-func BindValidParam[T any](ctx *gin.Context, param *T) error {
-	if err := DefaultGetValidParams(ctx, param); err != nil {
-		middleware.ResponseError(ctx, middleware.InvalidParamsCode, err)
-	}
-	return
 }

@@ -145,3 +145,9 @@ func ComLogNotice(ctx *gin.Context, ltag string, m map[string]any) {
 	traceContext := GetTraceContext(ctx)
 	Log.TagInfo(traceContext, ltag, m)
 }
+func ComLogErr(ctx *gin.Context, ltag string, err error) {
+	traceContext := GetTraceContext(ctx)
+	m:=make(map[string]any,1)
+	m["error"]=err
+	Log.TagError(traceContext, ltag, m)
+}

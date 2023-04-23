@@ -34,7 +34,7 @@ const (
 )
 
 type LogConfig struct {
-	Level string                   `mapstructure:"log_level"`
+	Level string               `mapstructure:"log_level"`
 	FW    LogConfFileWriter    `mapstructure:"file_writer"`
 	CW    LogConfConsoleWriter `mapstructure:"console_writer"`
 }
@@ -156,7 +156,7 @@ func (l *Logger) deliverRecordToWriter(level int8, format string, args ...any) {
 	} else {
 		inf = fmt.Sprint(args...)
 	}
-	_, file, line, ok := runtime.Caller(2)
+	_, file, line, ok := runtime.Caller(3)
 	if ok {
 		code = path.Base(file) + ":" + strconv.Itoa(line)
 	}
