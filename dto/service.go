@@ -61,9 +61,9 @@ type ServiceListItemOutput struct {
 	ActiveNode  int    `json:"active_node" form:"active_node"`   //活跃的节点数
 }
 type ServiceStatOutput struct {
-	Today     []int64 `json:"today" form:"today" comment:"今日流量" example:"" validate:""`         //列表
-	Yesterday []int64 `json:"yesterday" form:"yesterday" comment:"昨日流量" example:"" validate:""` //列表
-	LastWeek  []int64 `json:"last_week" form:"last_week" comment:"七日流量" example:"" validate:""` //列表
+	Today     []int64 `json:"today" form:"today" comment:"今日流量" example:"0" validate:""`         //列表
+	Yesterday []int64 `json:"yesterday" form:"yesterday" comment:"昨日流量" example:"0" validate:""` //列表
+	LastWeek  []int64 `json:"last_week" form:"last_week" comment:"七日流量" example:"0" validate:""` //列表
 }
 
 func (param *ServiceAddInput) BindValidParam(ctx *gin.Context) error {

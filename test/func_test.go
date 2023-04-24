@@ -72,3 +72,13 @@ func Test_InitModules(t *testing.T) {
 		fmt.Println(err)
 	}
 }
+
+func Test_ticket(t *testing.T) {
+	ticket := time.NewTicker(time.Second)
+	for {
+		select {
+		case de := <-ticket.C:
+			t.Log(de)
+		}
+	}
+}

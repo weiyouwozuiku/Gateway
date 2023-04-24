@@ -2,9 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/weiyouwozuiku/Gateway/dao"
@@ -13,6 +10,7 @@ import (
 	"github.com/weiyouwozuiku/Gateway/public"
 	"github.com/weiyouwozuiku/Gateway/server"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type ServiceController struct{}
@@ -24,7 +22,7 @@ func ServiceRegister(group *gin.RouterGroup) {
 	group.POST("/service_add_http", service.ServiceAddHTTP)
 	group.POST("/service_update_http", service.ServiceUpdateHTTP)
 	group.GET("/service_detail", service.ServiceDetail)
-	group.GET("/service_stat", service.ServiceStat)
+	//group.GET("/service_stat", service.ServiceStat)
 	group.POST("/service_add_tcp", service.ServiceAddTcp)
 	group.POST("/service_update_tcp", service.ServiceUpdateTcp)
 	group.POST("/service_add_grpc", service.ServiceAddGrpc)
@@ -621,7 +619,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 //	@Router			/service/service_add_grpc [post]
 func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	params := &dto.ServiceAddGrpcInput{}
-	if err := params.BindValidParam(c); err != nil {
+	if err := params.GetValidParams(c); err != nil {
 		middleware.ResponseError(c, 2001, err)
 		return
 	}
@@ -636,14 +634,14 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	tcpRuleSearch := &dao.TcpRule{
 		Port: params.Port,
 	}
-	if _, err := tcpRuleSearch.Find(c, lib.GORMDefaultPool, tcpRuleSearch); err == nil {
+	if _, err := tcpRuleSearch.Find(c, server.GORMDefaultPool, tcpRuleSearch); err == nil {
 		middleware.ResponseError(c, 2003, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
 	grpcRuleSearch := &dao.GrpcRule{
 		Port: params.Port,
 	}
-	if _, err := grpcRuleSearch.Find(c, lib.GORMDefaultPool, grpcRuleSearch); err == nil {
+	if _, err := grpcRuleSearch.Find(c, server.GORMDefaultPool, grpcRuleSearch); err == nil {
 		middleware.ResponseError(c, 2004, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
@@ -654,7 +652,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 		return
 	}
 
-	tx := lib.GORMDefaultPool.Begin()
+	tx := server.GORMDefaultPool.Begin()
 	info := &dao.ServiceInfo{
 		LoadType:    public.LoadTypeGRPC,
 		ServiceName: params.ServiceName,
@@ -733,12 +731,12 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 		return
 	}
 
-	tx := lib.GORMDefaultPool.Begin()
+	tx := server.GORMDefaultPool.Begin()
 
 	service := &dao.ServiceInfo{
 		ID: params.ID,
 	}
-	detail, err := service.ServiceDetail(c, lib.GORMDefaultPool, service)
+	detail, err := service.ServiceDetail(c, server.GORMDefaultPool, service)
 	if err != nil {
 		middleware.ResponseError(c, 2003, err)
 		return
@@ -812,48 +810,48 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 //	@Param			id	query		string											true	"服务ID"
 //	@Success		200	{object}	middleware.Response{data=dto.ServiceStatOutput}	"success"
 //	@Router			/service/service_stat [get]
-func (service *ServiceController) ServiceStat(c *gin.Context) {
-	params := &dto.ServiceDeleteInput{}
-	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, 2000, err)
-		return
-	}
-
-	//读取基本信息
-	tx, err := server.GetGORMPool(server.DBDefault)
-	if err != nil {
-		middleware.ResponseError(c, 2001, err)
-		return
-	}
-	serviceInfo := &dao.ServiceInfo{ID: params.ID}
-	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
-	if err != nil {
-		middleware.ResponseError(c, 2003, err)
-		return
-	}
-
-	counter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
-	if err != nil {
-		middleware.ResponseError(c, 2004, err)
-		return
-	}
-	todayList := []int64{}
-	currentTime := time.Now()
-	for i := 0; i <= currentTime.Hour(); i++ {
-		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, public.TimeLocation)
-		hourData, _ := counter.GetHourData(dateTime)
-		todayList = append(todayList, hourData)
-	}
-
-	yesterdayList := []int64{}
-	yesterTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
-	for i := 0; i <= 23; i++ {
-		dateTime := time.Date(yesterTime.Year(), yesterTime.Month(), yesterTime.Day(), i, 0, 0, 0, public.TimeLocation)
-		hourData, _ := counter.GetHourData(dateTime)
-		yesterdayList = append(yesterdayList, hourData)
-	}
-	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
-		Today:     todayList,
-		Yesterday: yesterdayList,
-	})
-}
+//func (service *ServiceController) ServiceStat(c *gin.Context) {
+//	params := &dto.ServiceDeleteInput{}
+//	if err := params.BindValidParam(c); err != nil {
+//		middleware.ResponseError(c, 2000, err)
+//		return
+//	}
+//
+//	//读取基本信息
+//	tx, err := server.GetGORMPool(server.DBDefault)
+//	if err != nil {
+//		middleware.ResponseError(c, 2001, err)
+//		return
+//	}
+//	serviceInfo := &dao.ServiceInfo{ID: params.ID}
+//	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
+//	if err != nil {
+//		middleware.ResponseError(c, 2003, err)
+//		return
+//	}
+//
+//	counter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
+//	if err != nil {
+//		middleware.ResponseError(c, 2004, err)
+//		return
+//	}
+//	todayList := []int64{}
+//	currentTime := time.Now()
+//	for i := 0; i <= currentTime.Hour(); i++ {
+//		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, public.TimeLocation)
+//		hourData, _ := counter.GetHourData(dateTime)
+//		todayList = append(todayList, hourData)
+//	}
+//
+//	yesterdayList := []int64{}
+//	yesterTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
+//	for i := 0; i <= 23; i++ {
+//		dateTime := time.Date(yesterTime.Year(), yesterTime.Month(), yesterTime.Day(), i, 0, 0, 0, public.TimeLocation)
+//		hourData, _ := counter.GetHourData(dateTime)
+//		yesterdayList = append(yesterdayList, hourData)
+//	}
+//	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
+//		Today:     todayList,
+//		Yesterday: yesterdayList,
+//	})
+//}

@@ -39,9 +39,9 @@ type ServiceUpdateGrpcInput struct {
 	ForbidList        string `json:"forbid_list" form:"forbid_list" comment:"禁用IP列表" validate:"valid_iplist"`
 }
 
-func (param *ServiceAddGrpcInput) BindValidParam(ctx *gin.Context) error {
+func (param *ServiceAddGrpcInput) GetValidParams(ctx *gin.Context) error {
 	return public.DefaultGetValidParams(ctx, param)
 }
-func (param *ServiceUpdateGrpcInput) BindValidParam(ctx *gin.Context) error {
+func (param *ServiceUpdateGrpcInput) GetValidParams(ctx *gin.Context) error {
 	return public.DefaultGetValidParams(ctx, param)
 }
