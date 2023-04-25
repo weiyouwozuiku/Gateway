@@ -68,7 +68,7 @@ func checkLTag(ltag string) string {
 	if ltag == LTagUndefined {
 		return ltag
 	}
-	return ltag
+	return CreateBizLTag(ltag)
 }
 func parseParams(m map[string]any) string {
 	ltag := LTagUndefined
@@ -147,7 +147,7 @@ func ComLogNotice(ctx *gin.Context, ltag string, m map[string]any) {
 }
 func ComLogErr(ctx *gin.Context, ltag string, err error) {
 	traceContext := GetTraceContext(ctx)
-	m:=make(map[string]any,1)
-	m["error"]=err
+	m := make(map[string]any, 1)
+	m["error"] = err
 	Log.TagError(traceContext, ltag, m)
 }

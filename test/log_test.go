@@ -2,7 +2,6 @@ package test
 
 import (
 	"github.com/weiyouwozuiku/Gateway/log"
-
 	"testing"
 )
 
@@ -23,7 +22,9 @@ func Test_LogInstance(t *testing.T) {
 		},
 	}
 	log.SetupLogInstanceWithConf(logConf, mylog)
-	mylog.Info("test")
+	mylog.Info("1")
+	log.Info("2")
+	log.Error("4")
 	mylog.Error("hello")
 	mylog.Close()
 }

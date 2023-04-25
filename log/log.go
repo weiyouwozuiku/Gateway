@@ -94,6 +94,8 @@ func NewLogger() *Logger {
 	}
 	l.wg = &sync.WaitGroup{}
 	go boostrapLogWriter(l)
+	takeup = true
+	logger_default = l
 	return l
 }
 func boostrapLogWriter(logger *Logger) {
