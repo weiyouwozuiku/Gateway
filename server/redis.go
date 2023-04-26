@@ -99,6 +99,8 @@ func RedisConnDo(trace *public.TraceContext, c redis.Conn, commandName string, a
 	}
 	return reply, err
 }
+
+// 通过配置 执行redis
 func RedisConfDo(trace *public.TraceContext, name string, commandName string, args ...any) (any, error) {
 	c, err := RedisConnFactory(name)
 	defer c.Close()
@@ -131,3 +133,5 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 	}
 	return reply, err
 }
+
+//func RedisLogDo(trace *public.TraceContext) { trace }

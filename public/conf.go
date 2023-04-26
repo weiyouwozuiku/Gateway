@@ -1,7 +1,7 @@
 package public
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -78,7 +78,10 @@ func ParseConfig(confName string, conf any) error {
 	if value, ok := ViperConfMap[confName]; !ok {
 		return errors.New("ViperConfMap中没有这个配置项" + confName)
 	} else {
-		value.Unmarshal(conf)
+		err := value.Unmarshal(conf)
+		if err != nil {
+			return errors.WithMessagef(err, "parse config error||error key=%s", confName)
+		}
 	}
 	return nil
 }
