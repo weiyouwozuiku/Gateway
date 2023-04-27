@@ -134,4 +134,25 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 	return reply, err
 }
 
-//func RedisLogDo(trace *public.TraceContext) { trace }
+func RedisLogDo(trace *public.TraceContext, c redis.Conn, commandName string, args ...interface{}) (interface{}, error) {
+	startExecTime := time.Now()
+	reply, err := c.Do(commandName, args...)
+	endExecTime := time.Now()
+	if err != nil {
+		public.TagError(trace, "_com_redis_failure", map[string]interface{}{
+			"method":    commandName,
+			"err":       err,
+			"bind":      args,
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	} else {
+		replyStr, _ := redis.String(reply, nil)
+		Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
+			"method":    commandName,
+			"bind":      args,
+			"reply":     replyStr,
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	}
+	return reply, err
+}
