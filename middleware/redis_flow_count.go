@@ -1,9 +1,11 @@
-package public
+package middleware
 
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/weiyouwozuiku/Gateway/log"
+	"github.com/weiyouwozuiku/Gateway/public"
+	"github.com/weiyouwozuiku/Gateway/server"
 	"sync/atomic"
 	"time"
 )
@@ -18,16 +20,16 @@ type RedisFlowCountService struct {
 }
 
 func (s *RedisFlowCountService) GetDayKey(t time.Time) string {
-	dayStr := t.In(TimeLocation).Format("20060102")
-	return fmt.Sprintf("%s_%s_%s", RedisFlowDayKey, dayStr, s.AppID)
+	dayStr := t.In(public.TimeLocation).Format("20060102")
+	return fmt.Sprintf("%s_%s_%s", public.RedisFlowDayKey, dayStr, s.AppID)
 }
 func (s *RedisFlowCountService) GetHourKey(t time.Time) string {
-	hourStr := t.In(TimeLocation).Format("2006010215")
-	return fmt.Sprintf("%s_%s_%s", RedisFlowHourKey, hourStr, s.AppID)
+	hourStr := t.In(public.TimeLocation).Format("2006010215")
+	return fmt.Sprintf("%s_%s_%s", public.RedisFlowHourKey, hourStr, s.AppID)
 }
 
 func (s *RedisFlowCountService) GetDayData(t time.Time) (int64, error) {
-	return redis.Int64()
+	return redis.Int64(server.RedisConfDo("GET", s.GetDayKey(t)))
 }
 func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCountService {
 	reqCounter := &RedisFlowCountService{

@@ -14,6 +14,8 @@ var (
 	RedisConfMap *RedisMapConf
 )
 
+const RedisDefault = "default"
+
 type RedisConf struct {
 	ProxyList    []string `mapstructure:"proxy_list"`
 	Password     string   `mapstructure:"password"`
@@ -101,7 +103,7 @@ func RedisConnDo(trace *public.TraceContext, c redis.Conn, commandName string, a
 }
 
 // 通过配置 执行redis
-func RedisConfDo(trace *public.TraceContext, name string, commandName string, args ...any) (any, error) {
+func RedisConfDoWithContext(trace *public.TraceContext, name string, commandName string, args ...any) (any, error) {
 	c, err := RedisConnFactory(name)
 	defer c.Close()
 	if err != nil {
@@ -134,12 +136,12 @@ func RedisConfDo(trace *public.TraceContext, name string, commandName string, ar
 	return reply, err
 }
 
-func RedisLogDo(trace *public.TraceContext, c redis.Conn, commandName string, args ...interface{}) (interface{}, error) {
+func RedisLogDoWithCtx(trace *public.TraceContext, c redis.Conn, commandName string, args ...interface{}) (interface{}, error) {
 	startExecTime := time.Now()
 	reply, err := c.Do(commandName, args...)
 	endExecTime := time.Now()
 	if err != nil {
-		public.TagError(trace, "_com_redis_failure", map[string]interface{}{
+		public.Log.TagError(trace, "_com_redis_failure", map[string]interface{}{
 			"method":    commandName,
 			"err":       err,
 			"bind":      args,
@@ -147,7 +149,7 @@ func RedisLogDo(trace *public.TraceContext, c redis.Conn, commandName string, ar
 		})
 	} else {
 		replyStr, _ := redis.String(reply, nil)
-		Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
+		public.Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
 			"method":    commandName,
 			"bind":      args,
 			"reply":     replyStr,
@@ -155,4 +157,17 @@ func RedisLogDo(trace *public.TraceContext, c redis.Conn, commandName string, ar
 		})
 	}
 	return reply, err
+}
+
+func RedisConfPipline(pip ...func(c redis.Conn)) error {
+	c, err := RedisConnFactory(RedisDefault)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	for _, f := range pip {
+		f(c)
+	}
+	c.Flush()
+	return nil
 }
