@@ -35,8 +35,10 @@ jobs:
 
       - name: Compress Source Code
         run: |
-          tar -czvf source_code.tar.gz . --exclude=source_code*
-          zip -r source_code.zip . -x source_code*
+          cd ..
+          tar -czvf source_code.tar.gz $GITHUB_WORKSPACE
+          zip -r source_code.zip $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE
 
       - name: Build binary
         run: GOOS=linux GOARCH=amd64 go build -o ${{env.REPO_NAME}}
