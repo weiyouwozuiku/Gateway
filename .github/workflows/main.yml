@@ -28,7 +28,9 @@ jobs:
           go mod download
 
       - name: Run tests
-        run: # go test ./...
+        run: |
+          echo "Run tests"
+          # go test ./...
 
       - name: Compress Source Code
         run: |
