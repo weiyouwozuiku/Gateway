@@ -22,14 +22,14 @@ func DashboardRegister(group *gin.RouterGroup) {
 }
 
 // PanelGroupData godoc
-// @Summary 指标统计
-// @Description 指标统计
-// @Tags 首页大盘
-// @ID /dashboard/panel_group_data
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} middleware.Response{data=dto.PanelGroupDataOutput} "success"
-// @Router /dashboard/panel_group_data [get]
+//	@Summary		指标统计
+//	@Description	指标统计
+//	@Tags			首页大盘
+//	@ID				/dashboard/panel_group_data
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	middleware.Response{data=dto.PanelGroupDataOutput}	"success"
+//	@Router			/dashboard/panel_group_data [get]
 func (s *DashboardController) PanelGroupData(c *gin.Context) {
 	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
@@ -62,14 +62,14 @@ func (s *DashboardController) PanelGroupData(c *gin.Context) {
 }
 
 // ServiceStat godoc
-// @Summary 服务统计
-// @Description 服务统计
-// @Tags 首页大盘
-// @ID /dashboard/service_stat
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} middleware.Response{data=dto.DashServiceStatOutput} "success"
-// @Router /dashboard/service_stat [get]
+//	@Summary		服务统计
+//	@Description	服务统计
+//	@Tags			首页大盘
+//	@ID				/dashboard/service_stat
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	middleware.Response{data=dto.DashServiceStatOutput}	"success"
+//	@Router			/dashboard/service_stat [get]
 func (s *DashboardController) ServiceStat(c *gin.Context) {
 	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
@@ -100,14 +100,14 @@ func (s *DashboardController) ServiceStat(c *gin.Context) {
 }
 
 // FlowStat godoc
-// @Summary 服务统计
-// @Description 服务统计
-// @Tags 首页大盘
-// @ID /dashboard/flow_stat
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} middleware.Response{data=dto.ServiceStatOutput} "success"
-// @Router /dashboard/flow_stat [get]
+//	@Summary		服务统计
+//	@Description	服务统计
+//	@Tags			首页大盘
+//	@ID				/dashboard/flow_stat
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	middleware.Response{data=dto.ServiceStatOutput}	"success"
+//	@Router			/dashboard/flow_stat [get]
 func (s *DashboardController) FlowStat(c *gin.Context) {
 	counter, err := middleware.FlowCounterHandler.GetFlowCounter(public.FlowTotal)
 	if err != nil {
