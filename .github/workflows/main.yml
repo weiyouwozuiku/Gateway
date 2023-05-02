@@ -29,7 +29,8 @@ jobs:
 
       - name: Run tests
         run: |
-          echo "Run tests"
+          echo $GITHUB_WORKSPACE
+          pwd
           # go test ./...
 
       - name: Compress Source Code
