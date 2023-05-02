@@ -53,13 +53,12 @@ func (s *DashboardController) PanelGroupData(c *gin.Context) {
 		middleware.ResponseError(c, middleware.InnerErr, err)
 		return
 	}
-	out := &dto.PanelGroupDataOutput{
+	middleware.ResponseSuccess(c, &dto.PanelGroupDataOutput{
 		ServiceNum:      serviceNum,
 		AppNum:          appNum,
 		TodayRequestNum: counter.TotalCount,
 		CurrentQPS:      counter.QPS,
-	}
-	middleware.ResponseSuccess(c, out)
+	})
 }
 
 // ServiceStat godoc
@@ -94,11 +93,10 @@ func (s *DashboardController) ServiceStat(c *gin.Context) {
 		list[index].Name = name
 		legend = append(legend, name)
 	}
-	out := &dto.DashServiceStatOutput{
+	middleware.ResponseSuccess(c, &dto.DashServiceStatOutput{
 		Legend: legend,
 		Data:   list,
-	}
-	middleware.ResponseSuccess(c, out)
+	})
 }
 
 // FlowStat godoc
