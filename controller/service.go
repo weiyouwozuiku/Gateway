@@ -6,11 +6,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/weiyouwozuiku/Gateway/dao"
 	"github.com/weiyouwozuiku/Gateway/dto"
+	"github.com/weiyouwozuiku/Gateway/handler"
 	"github.com/weiyouwozuiku/Gateway/middleware"
 	"github.com/weiyouwozuiku/Gateway/public"
-	"github.com/weiyouwozuiku/Gateway/server"
 	"gorm.io/gorm"
 	"strings"
+	"time"
 )
 
 type ServiceController struct{}
@@ -45,19 +46,19 @@ func ServiceRegister(group *gin.RouterGroup) {
 func (service *ServiceController) ServiceList(ctx *gin.Context) {
 	param := &dto.ServiceListInput{}
 	if err := param.BindValidParam(ctx); err != nil {
-		middleware.ResponseError(ctx, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(ctx, middleware.ParamErr, err)
 		return
 	}
-	tx, err := server.GetGORMPool(server.DBDefault)
+	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
-		middleware.ResponseError(ctx, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(ctx, middleware.GetGormPoolErr, err)
 		return
 	}
 	// 1. 从db获取信息
 	serviceInfo := &dao.ServiceInfo{}
 	list, total, err := serviceInfo.PageList(ctx, tx, param)
 	if err != nil {
-		middleware.ResponseError(ctx, middleware.GormQueryFailed, err)
+		middleware.ResponseError(ctx, middleware.QueryGormErr, err)
 		return
 	}
 	// 2. 格式化输出
@@ -65,7 +66,7 @@ func (service *ServiceController) ServiceList(ctx *gin.Context) {
 	for _, listItem := range list {
 		serviceDetail, err := listItem.ServiceDetail(ctx, tx, &listItem)
 		if err != nil {
-			middleware.ResponseError(ctx, middleware.GormQueryFailed, err)
+			middleware.ResponseError(ctx, middleware.QueryGormErr, err)
 			return
 		}
 
@@ -133,13 +134,13 @@ func (service *ServiceController) ServiceList(ctx *gin.Context) {
 func (service *ServiceController) ServiceDelete(c *gin.Context) {
 	params := &dto.ServiceDeleteInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
-	tx, err := server.GetGORMPool(server.DBDefault)
+	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GetGormPoolFailed, err)
+		middleware.ResponseError(c, middleware.GetGormPoolErr, err)
 		return
 	}
 
@@ -147,12 +148,12 @@ func (service *ServiceController) ServiceDelete(c *gin.Context) {
 	serviceInfo := &dao.ServiceInfo{ID: params.ID}
 	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GormQueryFailed, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 	serviceInfo.IsDelete = 1
 	if err := serviceInfo.Save(c, tx); err != nil {
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 	middleware.ResponseSuccess(c, "")
@@ -173,18 +174,18 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	params := &dto.ServiceAddHTTPInput{}
 	var err error
 	if err = params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("IP列表与权重列表数量不一致"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("IP列表与权重列表数量不一致"))
 		return
 	}
 	var tx *gorm.DB
-	tx, err = server.GetGORMPool(server.DBDefault)
+	tx, err = handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GetGormPoolFailed, err)
+		middleware.ResponseError(c, middleware.GetGormPoolErr, err)
 		return
 	}
 	tx = tx.Begin()
@@ -195,22 +196,22 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	}()
 	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
 	if _, err = serviceInfo.Find(c, tx, serviceInfo); err == nil {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务已存在"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务已存在"))
 		return
 	} else {
 		if err != gorm.ErrRecordNotFound {
-			middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务名查询失败"))
+			middleware.ResponseError(c, middleware.InnerErr, errors.New("服务名查询失败"))
 			return
 		}
 	}
 
 	httpUrl := &dao.HttpRule{RuleType: params.RuleType, Rule: params.Rule}
 	if _, err = httpUrl.Find(c, tx, httpUrl); err == nil {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务接入前缀或域名已存在"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务接入前缀或域名已存在"))
 		return
 	} else {
 		if err != gorm.ErrRecordNotFound {
-			middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务接入前缀或域名查询失败"))
+			middleware.ResponseError(c, middleware.InnerErr, errors.New("服务接入前缀或域名查询失败"))
 			return
 		}
 	}
@@ -220,7 +221,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		ServiceDesc: params.ServiceDesc,
 	}
 	if err = serviceModel.Save(c, tx); err != nil {
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	//serviceModel.ID
@@ -235,7 +236,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		HeaderTransfor: params.HeaderTransfor,
 	}
 	if err = httpRule.Save(c, tx); err != nil {
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -248,7 +249,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		ServiceFlowLimit:  params.ServiceFlowLimit,
 	}
 	if err = accessControl.Save(c, tx); err != nil {
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -263,7 +264,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		UpstreamMaxIdle:        params.UpstreamMaxIdle,
 	}
 	if err = loadbalance.Save(c, tx); err != nil {
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -284,18 +285,18 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	params := &dto.ServiceUpdateHTTPInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("IP列表与权重列表数量不一致"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("IP列表与权重列表数量不一致"))
 		return
 	}
 
-	tx, err := server.GetGORMPool(server.DBDefault)
+	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GetGormPoolFailed, err)
+		middleware.ResponseError(c, middleware.GetGormPoolErr, err)
 		return
 	}
 	tx = tx.Begin()
@@ -303,13 +304,13 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
 	if err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务不存在"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务不存在"))
 		return
 	}
 	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
 	if err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务不存在"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务不存在"))
 		return
 	}
 
@@ -317,7 +318,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -329,7 +330,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	httpRule.HeaderTransfor = params.HeaderTransfor
 	if err := httpRule.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -341,7 +342,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -355,7 +356,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	loadbalance.UpstreamMaxIdle = params.UpstreamMaxIdle
 	if err := loadbalance.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -376,13 +377,13 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 func (service *ServiceController) ServiceDetail(c *gin.Context) {
 	params := &dto.ServiceDetailInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
-	tx, err := server.GetGORMPool(server.DBDefault)
+	tx, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GetGormPoolFailed, err)
+		middleware.ResponseError(c, middleware.GetGormPoolErr, err)
 		return
 	}
 
@@ -390,12 +391,12 @@ func (service *ServiceController) ServiceDetail(c *gin.Context) {
 	serviceInfo := &dao.ServiceInfo{ID: params.ID}
 	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GormQueryFailed, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GormQueryFailed, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 	middleware.ResponseSuccess(c, serviceDetail)
@@ -407,9 +408,9 @@ func (service *ServiceController) CheckServiceName(c *gin.Context, name string) 
 		ServiceName: name,
 		IsDelete:    0,
 	}
-	if _, err := infoSearch.Find(c, server.GORMDefaultPool, infoSearch); err != gorm.ErrRecordNotFound {
+	if _, err := infoSearch.Find(c, handler.GORMDefaultPool, infoSearch); err != gorm.ErrRecordNotFound {
 		if err != nil {
-			public.ComLogErr(c, public.LTagMySQLError, err)
+			public.ComLogError(c, public.LTagMySQLError, map[string]any{"error": err})
 		}
 		return true
 	}
@@ -430,13 +431,13 @@ func (service *ServiceController) CheckServiceName(c *gin.Context, name string) 
 func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	params := &dto.ServiceAddTcpInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	//验证 service_name 是否被占用
 	if service.CheckServiceName(c, params.ServiceName) {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务名被占用，请重新输入"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务名被占用，请重新输入"))
 		return
 	}
 
@@ -444,25 +445,25 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	tcpRuleSearch := &dao.TcpRule{
 		Port: params.Port,
 	}
-	if _, err := tcpRuleSearch.Find(c, server.GORMDefaultPool, tcpRuleSearch); err == nil {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务端口被占用，请重新输入"))
+	if _, err := tcpRuleSearch.Find(c, handler.GORMDefaultPool, tcpRuleSearch); err == nil {
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
 	grpcRuleSearch := &dao.GrpcRule{
 		Port: params.Port,
 	}
-	if _, err := grpcRuleSearch.Find(c, server.GORMDefaultPool, grpcRuleSearch); err == nil {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("服务端口被占用，请重新输入"))
+	if _, err := grpcRuleSearch.Find(c, handler.GORMDefaultPool, grpcRuleSearch); err == nil {
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
 
 	//ip与权重数量一致
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, middleware.InternalErrorCode, errors.New("ip列表与权重设置不匹配"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("ip列表与权重设置不匹配"))
 		return
 	}
 
-	tx := server.GORMDefaultPool.Begin()
+	tx := handler.GORMDefaultPool.Begin()
 	info := &dao.ServiceInfo{
 		LoadType:    public.LoadTypeTCP,
 		ServiceName: params.ServiceName,
@@ -470,7 +471,7 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	}
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	loadBalance := &dao.LoadBalance{
@@ -482,7 +483,7 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	}
 	if err := loadBalance.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -492,7 +493,7 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	}
 	if err := httpRule.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -507,7 +508,7 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 	}
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -526,27 +527,27 @@ func (service *ServiceController) ServiceAddTcp(c *gin.Context) {
 //	@Param			body	body		dto.ServiceUpdateTcpInput			true	"body"
 //	@Success		200		{object}	middleware.Response{data=string}	"success"
 //	@Router			/service/service_update_tcp [post]
-func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
+func (service *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	params := &dto.ServiceUpdateTcpInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	//ip与权重数量一致
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, middleware.InvalidParamsCode, errors.New("ip列表与权重设置不匹配"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("ip列表与权重设置不匹配"))
 		return
 	}
 
-	tx := server.GORMDefaultPool.Begin()
+	tx := handler.GORMDefaultPool.Begin()
 
-	service := &dao.ServiceInfo{
+	ServiceInfo := &dao.ServiceInfo{
 		ID: params.ID,
 	}
-	detail, err := service.ServiceDetail(c, server.GORMDefaultPool, service)
+	detail, err := ServiceInfo.ServiceDetail(c, handler.GORMDefaultPool, ServiceInfo)
 	if err != nil {
-		middleware.ResponseError(c, middleware.GormQueryFailed, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 
@@ -554,7 +555,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, middleware.GormSaveFailed, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -569,7 +570,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	loadBalance.ForbidList = params.ForbidList
 	if err := loadBalance.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2004, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -581,7 +582,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	tcpRule.Port = params.Port
 	if err := tcpRule.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2005, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -598,7 +599,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2006, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -606,7 +607,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	return
 }
 
-// ServiceAddHttp godoc
+// ServiceAddGrpc godoc
 //
 //	@Summary		grpc服务添加
 //	@Description	grpc服务添加
@@ -620,13 +621,13 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	params := &dto.ServiceAddGrpcInput{}
 	if err := params.GetValidParams(c); err != nil {
-		middleware.ResponseError(c, 2001, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	//验证 service_name 是否被占用
 	if service.CheckServiceName(c, params.ServiceName) {
-		middleware.ResponseError(c, 2002, errors.New("服务名被占用，请重新输入"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务名被占用，请重新输入"))
 		return
 	}
 
@@ -634,25 +635,25 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	tcpRuleSearch := &dao.TcpRule{
 		Port: params.Port,
 	}
-	if _, err := tcpRuleSearch.Find(c, server.GORMDefaultPool, tcpRuleSearch); err == nil {
-		middleware.ResponseError(c, 2003, errors.New("服务端口被占用，请重新输入"))
+	if _, err := tcpRuleSearch.Find(c, handler.GORMDefaultPool, tcpRuleSearch); err == nil {
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
 	grpcRuleSearch := &dao.GrpcRule{
 		Port: params.Port,
 	}
-	if _, err := grpcRuleSearch.Find(c, server.GORMDefaultPool, grpcRuleSearch); err == nil {
-		middleware.ResponseError(c, 2004, errors.New("服务端口被占用，请重新输入"))
+	if _, err := grpcRuleSearch.Find(c, handler.GORMDefaultPool, grpcRuleSearch); err == nil {
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
 
 	//ip与权重数量一致
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, 2005, errors.New("ip列表与权重设置不匹配"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("ip列表与权重设置不匹配"))
 		return
 	}
 
-	tx := server.GORMDefaultPool.Begin()
+	tx := handler.GORMDefaultPool.Begin()
 	info := &dao.ServiceInfo{
 		LoadType:    public.LoadTypeGRPC,
 		ServiceName: params.ServiceName,
@@ -660,7 +661,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	}
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2006, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -673,7 +674,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	}
 	if err := loadBalance.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2007, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -684,7 +685,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	}
 	if err := grpcRule.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2008, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -699,7 +700,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	}
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2009, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -707,7 +708,7 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	return
 }
 
-// ServiceUpdateTcp godoc
+// ServiceUpdateGrpc godoc
 //
 //	@Summary		grpc服务更新
 //	@Description	grpc服务更新
@@ -721,24 +722,24 @@ func (service *ServiceController) ServiceAddGrpc(c *gin.Context) {
 func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 	params := &dto.ServiceUpdateGrpcInput{}
 	if err := params.GetValidParams(c); err != nil {
-		middleware.ResponseError(c, 2001, err)
+		middleware.ResponseError(c, middleware.ParamErr, err)
 		return
 	}
 
 	//ip与权重数量一致
 	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
-		middleware.ResponseError(c, 2002, errors.New("ip列表与权重设置不匹配"))
+		middleware.ResponseError(c, middleware.InnerErr, errors.New("ip列表与权重设置不匹配"))
 		return
 	}
 
-	tx := server.GORMDefaultPool.Begin()
+	tx := handler.GORMDefaultPool.Begin()
 
 	service := &dao.ServiceInfo{
 		ID: params.ID,
 	}
-	detail, err := service.ServiceDetail(c, server.GORMDefaultPool, service)
+	detail, err := service.ServiceDetail(c, handler.GORMDefaultPool, service)
 	if err != nil {
-		middleware.ResponseError(c, 2003, err)
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
 		return
 	}
 
@@ -746,7 +747,7 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2004, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -761,7 +762,7 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 	loadBalance.ForbidList = params.ForbidList
 	if err := loadBalance.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2005, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -774,7 +775,7 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 	grpcRule.HeaderTransfor = params.HeaderTransfor
 	if err := grpcRule.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2006, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 
@@ -791,7 +792,7 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2007, err)
+		middleware.ResponseError(c, middleware.SaveGormErr, err)
 		return
 	}
 	tx.Commit()
@@ -810,48 +811,58 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 //	@Param			id	query		string											true	"服务ID"
 //	@Success		200	{object}	middleware.Response{data=dto.ServiceStatOutput}	"success"
 //	@Router			/service/service_stat [get]
-//func (service *ServiceController) ServiceStat(c *gin.Context) {
-//	params := &dto.ServiceDeleteInput{}
-//	if err := params.BindValidParam(c); err != nil {
-//		middleware.ResponseError(c, 2000, err)
-//		return
-//	}
-//
-//	//读取基本信息
-//	tx, err := server.GetGORMPool(server.DBDefault)
-//	if err != nil {
-//		middleware.ResponseError(c, 2001, err)
-//		return
-//	}
-//	serviceInfo := &dao.ServiceInfo{ID: params.ID}
-//	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
-//	if err != nil {
-//		middleware.ResponseError(c, 2003, err)
-//		return
-//	}
-//
-//	counter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
-//	if err != nil {
-//		middleware.ResponseError(c, 2004, err)
-//		return
-//	}
-//	todayList := []int64{}
-//	currentTime := time.Now()
-//	for i := 0; i <= currentTime.Hour(); i++ {
-//		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, public.TimeLocation)
-//		hourData, _ := counter.GetHourData(dateTime)
-//		todayList = append(todayList, hourData)
-//	}
-//
-//	yesterdayList := []int64{}
-//	yesterTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
-//	for i := 0; i <= 23; i++ {
-//		dateTime := time.Date(yesterTime.Year(), yesterTime.Month(), yesterTime.Day(), i, 0, 0, 0, public.TimeLocation)
-//		hourData, _ := counter.GetHourData(dateTime)
-//		yesterdayList = append(yesterdayList, hourData)
-//	}
-//	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
-//		Today:     todayList,
-//		Yesterday: yesterdayList,
-//	})
-//}
+func (service *ServiceController) ServiceStat(c *gin.Context) {
+	params := &dto.ServiceDeleteInput{}
+	if err := params.BindValidParam(c); err != nil {
+		middleware.ResponseError(c, middleware.ParamErr, err)
+		return
+	}
+
+	//读取基本信息
+	tx, err := handler.GetGORMPool(handler.DBDefault)
+	if err != nil {
+		middleware.ResponseError(c, middleware.GetGormPoolErr, err)
+		return
+	}
+	serviceInfo := &dao.ServiceInfo{ID: params.ID}
+	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
+	if err != nil {
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
+		return
+	}
+
+	counter, err := middleware.FlowCounterHandler.GetFlowCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
+	if err != nil {
+		middleware.ResponseError(c, middleware.QueryGormErr, err)
+		return
+	}
+	todayList := []int64{}
+	currentTime := time.Now()
+	for i := 0; i <= currentTime.Hour(); i++ {
+		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, public.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		todayList = append(todayList, hourData)
+	}
+
+	yesterdayList := []int64{}
+	yesterDayTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
+	for i := 0; i <= 23; i++ {
+		dateTime := time.Date(yesterDayTime.Year(), yesterDayTime.Month(), yesterDayTime.Day(), i, 0, 0, 0, public.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		yesterdayList = append(yesterdayList, hourData)
+	}
+
+	//lastWeekList := []int64{}
+	//lastWeekTime := currentTime.Add(-7 * time.Duration(time.Hour*24))
+	//for i := 0; i <= 6; i++ {
+	//	for j := 0; j <= 23; j++ {
+	//		dateTime := time.Date(lastWeekTime.Year(), lastWeekTime.Month(), lastWeekTime.Day()+i, j, 0, 0, 0, public.TimeLocation)
+	//		hourData, _ := counter.GetHourData(dateTime)
+	//		yesterdayList = append(yesterdayList, hourData)
+	//	}
+	//}
+	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
+		Today:     todayList,
+		Yesterday: yesterdayList,
+	})
+}

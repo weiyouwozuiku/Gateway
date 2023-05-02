@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	server2 "github.com/weiyouwozuiku/Gateway/handler"
 	"testing"
 
 	"github.com/gomodule/redigo/redis"
@@ -11,7 +12,7 @@ import (
 
 func Test_Redis(t *testing.T) {
 	SetUp()
-	c, err := server.RedisConnFactory("default")
+	c, err := server2.RedisConnFactory("default")
 	if err != nil {
 		t.Fatal(err)
 	}

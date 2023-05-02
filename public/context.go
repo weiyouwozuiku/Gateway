@@ -19,6 +19,18 @@ func SetGinTraceContext(c *gin.Context, trace *TraceContext) error {
 	c.Set(TraceKey, trace)
 	return nil
 }
+func GetGinTraceContext(c *gin.Context) *TraceContext {
+	if c == nil {
+		return NewTrace()
+	}
+	traceContext, exiests := c.Get(TraceKey)
+	if exiests {
+		if tc, ok := traceContext.(*TraceContext); ok {
+			return tc
+		}
+	}
+	return NewTrace()
+}
 func SetTraceContext(ctx context.Context, trace *TraceContext) context.Context {
 	if trace == nil {
 		return ctx
@@ -34,9 +46,9 @@ func GetTraceContext(ctx context.Context) *TraceContext {
 		if !exists {
 			return NewTrace()
 		}
-		if traceConext, ok := ginCtxTrace.(*TraceContext); ok {
-			if traceConext != nil {
-				return traceConext
+		if traceContext, ok := ginCtxTrace.(*TraceContext); ok {
+			if traceContext != nil {
+				return traceContext
 			}
 		}
 		return NewTrace()

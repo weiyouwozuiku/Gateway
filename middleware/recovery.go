@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
@@ -22,9 +21,9 @@ func RecoveryMiddleware() gin.HandlerFunc {
 					"stack": string(debug.Stack()),
 				})
 				if public.ConfBase.DebugMode != "debug" {
-					ResponseError(ctx, http.StatusInternalServerError, errors.New("内部错误"))
+					ResponseError(ctx, InnerErr, errors.New("内部错误"))
 				} else {
-					ResponseError(ctx, http.StatusInternalServerError, errors.New(fmt.Sprint(err)))
+					ResponseError(ctx, InnerErr, errors.New(fmt.Sprint(err)))
 				}
 			}
 		}()

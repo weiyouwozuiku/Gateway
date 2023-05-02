@@ -3,13 +3,13 @@ package initialize
 import (
 	"errors"
 	"fmt"
+	"github.com/weiyouwozuiku/Gateway/handler"
 	"log"
 	"os"
 	"time"
 
 	mylog "github.com/weiyouwozuiku/Gateway/log"
 	"github.com/weiyouwozuiku/Gateway/public"
-	"github.com/weiyouwozuiku/Gateway/server"
 )
 
 func InitModules(path string, modules ...string) error {
@@ -68,14 +68,14 @@ func initModules(configPath string, modules []string) error {
 
 	// 加载mysql配置
 	if public.InArrayString("mysql", modules) {
-		if err := server.InitDBConf("mysql"); err != nil {
+		if err := handler.InitDBConf("mysql"); err != nil {
 			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitDBConf:"+err.Error())
 		}
 	}
 
 	// 加载redis配置
 	if public.InArrayString("redis", modules) {
-		if err := server.InitRedisConf("redis"); err != nil {
+		if err := handler.InitRedisConf("redis"); err != nil {
 			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitRedisConf:"+err.Error())
 		}
 	}
@@ -87,7 +87,7 @@ func initModules(configPath string, modules []string) error {
 func Destory() {
 	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO] %s\n", " start destroy resources.")
-	server.CloseDB()
+	handler.CloseDB()
 	mylog.CloseLogger()
 	log.Printf("[INFO] %s\n", " success destroy resources.")
 	log.Println("------------------------------------------------------------------------")

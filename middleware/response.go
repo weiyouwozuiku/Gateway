@@ -10,26 +10,7 @@ import (
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
-type ResponseCode int
-
-const (
-	SuccessCode ResponseCode = iota
-	UndefErrorCode
-	ValidErrorCode
-	InternalErrorCode
-
-	InvalidRequestErrorCode ResponseCode = 401
-	CustomizeCode           ResponseCode = 1000
-
-	InvalidParamsCode       ResponseCode = 2000
-	GetGormPoolFailed       ResponseCode = 2001
-	GROUPALL_SAVE_FLOWERROR ResponseCode = 2002
-	AdminLoginFailed        ResponseCode = 2003
-	SessionParseFailed      ResponseCode = 2004
-	GormQueryFailed         ResponseCode = 2005
-	GormSaveFailed          ResponseCode = 2006
-	SessionOptFailed        ResponseCode = 2207
-)
+const ()
 
 type Response struct {
 	ErrorCode ResponseCode `json:"errno"`
@@ -39,7 +20,7 @@ type Response struct {
 	Stack     any          `json:"stack"`
 }
 
-func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
+func ResponseError(ctx *gin.Context, info Error, err error) {
 	trace, _ := ctx.Get(public.TraceKey)
 	traceContext, _ := trace.(*public.TraceContext)
 	traceId := ""
@@ -51,8 +32,8 @@ func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 		stack = strings.Replace(fmt.Sprintf("%+v", err), err.Error()+"\n", "", -1)
 	}
 	resp := &Response{
-		ErrorCode: code,
-		ErrorMsg:  err.Error(),
+		ErrorCode: info.errno,
+		ErrorMsg:  fmt.Sprintf("%s||error=%v", info.errmsg, err),
 		Data:      "",
 		TraceId:   traceId,
 		Stack:     stack,
@@ -60,7 +41,9 @@ func ResponseError(ctx *gin.Context, code ResponseCode, err error) {
 	ctx.JSON(http.StatusOK, resp)
 	response, _ := json.Marshal(resp)
 	ctx.Set("response", string(response))
-	ctx.AbortWithError(http.StatusOK, err)
+	if err = ctx.AbortWithError(http.StatusOK, err); err != nil {
+		public.ComLogError(ctx, public.LTagRespErr, map[string]any{"error": err})
+	}
 }
 
 func ResponseSuccess(ctx *gin.Context, data any) {

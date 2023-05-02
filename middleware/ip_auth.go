@@ -16,7 +16,7 @@ func IPAuthMiddleware() gin.HandlerFunc {
 			}
 		}
 		if !isMatched {
-			ResponseError(ctx, InternalErrorCode, fmt.Errorf("%v, not in iplist", ctx.ClientIP()))
+			ResponseError(ctx, InnerErr, fmt.Errorf("%v, not in iplist", ctx.ClientIP()))
 			ctx.Abort()
 			return
 		}

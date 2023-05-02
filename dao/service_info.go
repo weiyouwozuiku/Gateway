@@ -42,8 +42,7 @@ func (info *ServiceInfo) PageList(ctx *gin.Context, tx *gorm.DB, param *dto.Serv
 	total := int64(0)
 	var list []ServiceInfo
 	offset := (param.PageNo - 1) * param.PageSize
-	query := tx.WithContext(ctx)
-	query = query.Table(info.TableName()).Where("is_delete=0")
+	query := tx.WithContext(ctx).Table(info.TableName()).Where("is_delete=0")
 	if param.Info != "" {
 		query = query.Where("(service_name like ? or service_desc like ?)", "%"+param.Info+"%", "%"+param.Info+"%")
 	}
@@ -52,6 +51,49 @@ func (info *ServiceInfo) PageList(ctx *gin.Context, tx *gorm.DB, param *dto.Serv
 	}
 	query.Count(&total)
 	return list, total, nil
+}
+func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
+	if search.ServiceName == "" {
+		info, err := info.Find(ctx, tx, search)
+		if err != nil {
+			return nil, err
+		}
+		search = info
+	}
+
+	resultChan := make(chan any, 5)
+	findHttpRule(ctx, tx, search.ID, resultChan)
+	findTcpRule(ctx, tx, search.ID, resultChan)
+	findGrpcRule(ctx, tx, search.ID, resultChan)
+	findAccess(ctx, tx, search.ID, resultChan)
+	findLoad(ctx, tx, search.ID, resultChan)
+
+	detail := &ServiceDetail{Info: search}
+	for i := 0; i < 5; i++ {
+		result := <-resultChan
+		switch result.(type) {
+		case *HttpRule:
+			detail.HTTPRule = result.(*HttpRule)
+		case *TcpRule:
+			detail.TCPRule = result.(*TcpRule)
+		case *GrpcRule:
+			detail.GRPCRule = result.(*GrpcRule)
+		case *LoadBalance:
+			detail.LoadBalance = result.(*LoadBalance)
+		case *AccessControl:
+			detail.AccessControl = result.(*AccessControl)
+		case error:
+			return nil, result.(error)
+		}
+	}
+	return detail, nil
+}
+func (info *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]dto.DashServiceStatItemOutput, error) {
+	list := []dto.DashServiceStatItemOutput{}
+	if err := tx.WithContext(c).Table(info.TableName()).Where("is_delete=0").Select("load_type,count(*) as value").Group("load_type").Scan(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
@@ -103,40 +145,4 @@ func findLoad(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- a
 	} else {
 		resultChan <- item
 	}
-}
-func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
-	if search.ServiceName == "" {
-		info, err := info.Find(ctx, tx, search)
-		if err != nil {
-			return nil, err
-		}
-		search = info
-	}
-
-	resultChan := make(chan any, 5)
-	findHttpRule(ctx, tx, search.ID, resultChan)
-	findTcpRule(ctx, tx, search.ID, resultChan)
-	findGrpcRule(ctx, tx, search.ID, resultChan)
-	findAccess(ctx, tx, search.ID, resultChan)
-	findLoad(ctx, tx, search.ID, resultChan)
-
-	detail := &ServiceDetail{Info: search}
-	for i := 0; i < 5; i++ {
-		result := <-resultChan
-		switch result.(type) {
-		case *HttpRule:
-			detail.HTTPRule = result.(*HttpRule)
-		case *TcpRule:
-			detail.TCPRule = result.(*TcpRule)
-		case *GrpcRule:
-			detail.GRPCRule = result.(*GrpcRule)
-		case *LoadBalance:
-			detail.LoadBalance = result.(*LoadBalance)
-		case *AccessControl:
-			detail.AccessControl = result.(*AccessControl)
-		case error:
-			return nil, result.(error)
-		}
-	}
-	return detail, nil
 }

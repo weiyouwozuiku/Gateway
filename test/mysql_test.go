@@ -3,10 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
-
+	"github.com/weiyouwozuiku/Gateway/handler"
 	"github.com/weiyouwozuiku/Gateway/public"
-	"github.com/weiyouwozuiku/Gateway/server"
-
 	"testing"
 	"time"
 )
@@ -33,23 +31,23 @@ type Test1 struct {
 func Test_DBPool(t *testing.T) {
 	SetUp()
 	// 获取连接池
-	dbpool, err := server.GetDBPool("default")
+	dbpool, err := handler.GetDBPool("default")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 执行事务
 	trace := public.NewTrace()
-	if _, err := server.DBPoolQuery(trace, dbpool, beginSQL); err != nil {
+	if _, err := handler.DBPoolQuery(trace, dbpool, beginSQL); err != nil {
 		t.Fatal(err)
 	}
 	// 创建表
-	if _, err := server.DBPoolQuery(trace, dbpool, createTableSQL); err != nil {
-		server.DBPoolQuery(trace, dbpool, rollbackSQL)
+	if _, err := handler.DBPoolQuery(trace, dbpool, createTableSQL); err != nil {
+		handler.DBPoolQuery(trace, dbpool, rollbackSQL)
 		t.Fatal(err)
 	}
 	// 插入数据
-	if _, err := server.DBPoolQuery(trace, dbpool, insertSQL); err != nil {
-		server.DBPoolQuery(trace, dbpool, rollbackSQL)
+	if _, err := handler.DBPoolQuery(trace, dbpool, insertSQL); err != nil {
+		handler.DBPoolQuery(trace, dbpool, rollbackSQL)
 		t.Fatal(err)
 	}
 	// // 插入数据
@@ -63,9 +61,9 @@ func Test_DBPool(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------")
 	fmt.Printf("%6s | %6s\n", "id", "created_at")
 	for {
-		rows, err := server.DBPoolQuery(trace, dbpool, selectSQL, current_id)
+		rows, err := handler.DBPoolQuery(trace, dbpool, selectSQL, current_id)
 		if err != nil {
-			server.DBPoolQuery(trace, dbpool, rollbackSQL)
+			handler.DBPoolQuery(trace, dbpool, rollbackSQL)
 			t.Fatal(err)
 		}
 		defer rows.Close()
@@ -73,7 +71,7 @@ func Test_DBPool(t *testing.T) {
 		for rows.Next() {
 			create_time := ""
 			if err := rows.Scan(&current_id, &create_time); err != nil {
-				server.DBPoolQuery(trace, dbpool, rollbackSQL)
+				handler.DBPoolQuery(trace, dbpool, rollbackSQL)
 				t.Fatal(err)
 			}
 			fmt.Printf("%6d | %6s\n", current_id, create_time)
@@ -86,18 +84,18 @@ func Test_DBPool(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------")
 	fmt.Println("finish read table ", table_name, "")
 	// 删除表
-	if _, err := server.DBPoolQuery(trace, dbpool, dropTableSQL); err != nil {
-		server.DBPoolQuery(trace, dbpool, rollbackSQL)
+	if _, err := handler.DBPoolQuery(trace, dbpool, dropTableSQL); err != nil {
+		handler.DBPoolQuery(trace, dbpool, rollbackSQL)
 		t.Fatal(err)
 	}
 	// 提交事务
-	server.DBPoolQuery(trace, dbpool, commitSQL)
+	handler.DBPoolQuery(trace, dbpool, commitSQL)
 	TearDown()
 }
 
 func Test_GormPool(t *testing.T) {
 	SetUp()
-	dbpool, err := server.GetGORMPool(server.DBDefault)
+	dbpool, err := handler.GetGORMPool(handler.DBDefault)
 	if err != nil {
 		t.Fatal(err)
 	}

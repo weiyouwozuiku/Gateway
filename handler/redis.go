@@ -1,8 +1,9 @@
-package server
+package handler
 
 import (
 	"errors"
 	"fmt"
+	"github.com/weiyouwozuiku/Gateway/log"
 	"math/rand"
 	"time"
 
@@ -79,7 +80,7 @@ func RedisConnFactory(name string) (redis.Conn, error) {
 	}
 	return nil, errors.New("create redis conn fail")
 }
-func RedisConnDo(trace *public.TraceContext, c redis.Conn, commandName string, args ...any) (any, error) {
+func RedisConnDoWithCtx(trace *public.TraceContext, c redis.Conn, commandName string, args ...any) (any, error) {
 	startExecTime := time.Now()
 	reply, err := c.Do(commandName, args...)
 	endExecTime := time.Now()
@@ -164,10 +165,32 @@ func RedisConfPipline(pip ...func(c redis.Conn)) error {
 	if err != nil {
 		return err
 	}
-	defer c.Close()
+	defer func(c redis.Conn) {
+		err := c.Close()
+		if err != nil {
+			log.Error("RedisConfPipline close redis error||error=%v", err)
+		}
+	}(c)
 	for _, f := range pip {
 		f(c)
 	}
-	c.Flush()
+	err = c.Flush()
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func RedisConfDo(commandName string, args ...any) (any, error) {
+	c, err := RedisConnFactory(RedisDefault)
+	if err != nil {
+		return nil, err
+	}
+	defer func(c redis.Conn) {
+		err := c.Close()
+		if err != nil {
+			log.Error("RedisConfDo close redis error||error=%v", err)
+		}
+	}(c)
+	return c.Do(commandName, args...)
 }
