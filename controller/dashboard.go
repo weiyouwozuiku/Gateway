@@ -22,6 +22,7 @@ func DashboardRegister(group *gin.RouterGroup) {
 }
 
 // PanelGroupData godoc
+//
 //	@Summary		指标统计
 //	@Description	指标统计
 //	@Tags			首页大盘
@@ -62,6 +63,7 @@ func (s *DashboardController) PanelGroupData(c *gin.Context) {
 }
 
 // ServiceStat godoc
+//
 //	@Summary		服务统计
 //	@Description	服务统计
 //	@Tags			首页大盘
@@ -82,7 +84,7 @@ func (s *DashboardController) ServiceStat(c *gin.Context) {
 		middleware.ResponseError(c, middleware.InnerErr, err)
 		return
 	}
-	legend := []string{}
+	var legend []string
 	for index, item := range list {
 		name, ok := public.LoadTypeMap[item.LoadType]
 		if !ok {
@@ -100,6 +102,7 @@ func (s *DashboardController) ServiceStat(c *gin.Context) {
 }
 
 // FlowStat godoc
+//
 //	@Summary		服务统计
 //	@Description	服务统计
 //	@Tags			首页大盘
@@ -114,14 +117,14 @@ func (s *DashboardController) FlowStat(c *gin.Context) {
 		middleware.ResponseError(c, middleware.InnerErr, err)
 		return
 	}
-	todayList := []int64{}
+	var todayList []int64
 	currentTime := time.Now()
 	for i := 0; i <= currentTime.Hour(); i++ {
 		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, public.TimeLocation)
 		hourDate, _ := counter.GetHourData(dateTime)
 		todayList = append(todayList, hourDate)
 	}
-	yesterdayList := []int64{}
+	var yesterdayList []int64
 	yesterdayTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
 	for i := 0; i <= 23; i++ {
 		dateTime := time.Date(yesterdayTime.Year(), yesterdayTime.Month(), yesterdayTime.Day(), i, 0, 0, 0, public.TimeLocation)
