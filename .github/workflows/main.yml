@@ -39,6 +39,7 @@ jobs:
             major_version=1
             minor_version=0
             patch_version=0
+            echo $minor_version
           fi
           echo $minor_version
           echo "MajorVersion=$minor_version" 
