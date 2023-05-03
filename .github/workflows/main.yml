@@ -20,14 +20,16 @@ jobs:
         run: echo ${{ env.GITHUB_TAG_NAME }}
 
       - name: Set tag name
+        id: tag_name
         run: |
           TAG_NAME=$(echo ${GITHUB_REF##*/})_$(date +%s)
-          export TAG_NAME=$TAG_NAME
+          echo "TAG_NAME is $TAG_NAME"
+          echo "::set-output name=tag_name::$TAG_NAME"
         shell: bash
 
       - name: Use tag name in next step
         run: |
-          echo "Tag name is: ${{ env.TAG_NAME }}"
+          echo "Tag name is: ${{ steps.tag_name.outputs.tag_name }}"
         shell: bash
 
 #      - name: Set up Go
