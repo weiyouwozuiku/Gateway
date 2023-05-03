@@ -12,6 +12,7 @@ env:
   MajorVersion: 0
   MinorVersion: 0
   PatchVersion: 0
+  CommitMessage: ""
 
 jobs:
   setup-environment:
@@ -33,25 +34,21 @@ jobs:
             major_version=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
             minor_version=$(echo $latest_tag | cut -d '.' -f 2)
             patch_version=$(echo $latest_tag | cut -d '.' -f 3)
-            echo "Major version: $major, Minor version: $minor, Patch version: $patch"
+            echo "Major version: major_version, Minor version: minor_version, Patch version: patch_version"
           else
             echo "Latest tag does not match the pattern vX.X.X"
             major_version=1
             minor_version=0
             patch_version=0
-            echo major_version
           fi
-          echo $major_version
-          echo "MajorVersion=$major_version" 
-          echo "MajorVersion=$minor_version" >> $GITHUB_ENV
-          echo ::set-output name=minor_version::$minor_version
-          echo ::set-output name=patch_version::$patch_version
-          echo ${{env.MajorVersion}}
+          echo "MajorVersion=$major_version" >> $GITHUB_ENV
+          echo "MinorVersion=$minor_version" >> $GITHUB_ENV
+          echo "PatchVersion=$patch_version" >> $GITHUB_ENV
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
         id: check_commit_message
-        run: echo ::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})
+        run: echo "CommitMessage=$(git log --format=%B -n 1 ${{ github.sha }})" >> $GITHUB_ENV
 
   build-test:
     needs: setup-environment
@@ -81,7 +78,7 @@ jobs:
         run: |
           go mod tidy
           go mod download
-          echo ${{ env.MajorVersion }}
+          echo $GITHUB_ENV
 
       - name: Run tests
         run: |
