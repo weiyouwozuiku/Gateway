@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set environment variables
-        run: echo ${{ env.GITHUB_TAG_NAME }}
 
       - name: Set tag name
         id: tag_name
