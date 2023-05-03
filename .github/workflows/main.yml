@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: ECHO
         run: echo $(echo ${GITHUB_REF##*/})_$(date +%s)
 
 #      - name: Set up Go
