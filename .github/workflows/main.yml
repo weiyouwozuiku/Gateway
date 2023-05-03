@@ -78,8 +78,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $TAG_NAME
-          release_name: Release $TAG_NAME
+          tag_name: ${{ steps.tag_name.outputs.tag_name }}
+          release_name: Release ${{ steps.tag_name.outputs.tag_name }}
           body: Automated release created by GitHub Actions.
           draft: false
           prerelease: false
