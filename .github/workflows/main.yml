@@ -10,15 +10,33 @@ env:
   REPO_NAME: "Gateway"
   DOCKER_IMAGE_NAME: "gateway"
   VERSION_FILE: ./version.txt
-  MAJOR_VERSION: ${{ steps.read_version.outputs.major_version }}
-  MINOR_VERSION: ${{ steps.read_version.outputs.minor_version }}
-  PATCH_VERSION: ${{ steps.read_version.outputs.patch_version }}
-  COUNTER_FILE: ./counter.txt
-  COUNTER: ${{ steps.read_counter.outputs.counter }}
 
 jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-  build-and-test:
+      # 读取版本号并更新
+      - name: Read version
+        id: read_version
+        run: |
+          if [[ ! -f $VERSION_FILE ]]; then
+            echo "1.0.0" > $VERSION_FILE
+          fi
+          cat $VERSION_FILE
+          VERSION=$(cat $VERSION_FILE)
+          echo ::set-output name=major_version::$(echo $VERSION | cut -d '.' -f 1)
+          echo ::set-output name=minor_version::$(echo $VERSION | cut -d '.' -f 2)
+          echo ::set-output name=patch_version::$(echo $VERSION | cut -d '.' -f 3)
+
+      # 检查出当前提交的 commit message 并设置输出变量
+      - name: Check commit message
+        id: check_commit_message
+        run: echo ::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})
+
+  build-test:
+    needs: setup-environment
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -54,62 +72,24 @@ jobs:
       - name: Build binary
         run: GOOS=linux GOARCH=amd64 go build -o ${{env.REPO_NAME}}
 
-      # 检查出当前提交的 commit message 并设置输出变量
-      - name: Check commit message
-        id: check_commit_message
-        run: echo ::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})
-
-      - name: Login to Docker Hub
-        if: ${{ steps.check_commit_message.outputs.commit_message != 'save' }}
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_PULL_SECRET }}
-
-      - name: Build and push Docker images
-        if: ${{ steps.check_commit_message.outputs.commit_message != 'save' }}
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-      # 读取版本号并更新
-      - name: Read version
-        id: read_version
-        run: |
-          if [[ ! -f $VERSION_FILE ]]; then
-            echo "1.0.0" > $VERSION_FILE
-          fi
-          cat $VERSION_FILE
-          VERSION=$(cat $VERSION_FILE)
-          MAJOR_VERSION=$(echo $VERSION | cut -d '.' -f 1)
-          MINOR_VERSION=$(echo $VERSION | cut -d '.' -f 2)
-          PATCH_VERSION=$(echo $VERSION | cut -d '.' -f 3)
-          echo "MAJOR_VERSION=$MAJOR_VERSION"
-          echo "MINOR_VERSION=$MINOR_VERSION"
-          echo "PATCH_VERSION=$PATCH_VERSION"
-
-      # 读取计数器值并更新
-      - name: Read counter
-        id: read_counter
-        run: |
-          if [[ -f $COUNTER_FILE ]]; then
-            echo $(cat $COUNTER_FILE)
-          else
-            echo 0
-          fi
-
+  release:
+    needs: [environment,build-test]
+    if:  github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.head_commit.message !=~ /save/i
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: ECHO PWD
+        run: ls -al
       - name: Update version
-        if: ${{ steps.check_commit_message.outputs.commit_message != 'save' }}
+        id: update_version
+        if: ${{ needs.setup-environment.outputs.commit_message != 'save' }}
         run: |
           if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
             exit 0
           fi
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=${{ steps.check_commit_message.outputs.commit_message }}
+            COMMIT_MESSAGE=${{ needs.setup-environment.outputs.commit_message }}
             MAJOR_BUMP=false
             MINOR_BUMP=false
 
@@ -119,44 +99,57 @@ jobs:
               MINOR_BUMP=true
             fi
 
+            # 读取环境变量中的版本号和计数器值
+            MAJOR_VERSION=${{ needs.setup-environment.outputs.major_version }}
+            MINOR_VERSION=${{ needs.setup-environment.outputs.minor_version }}
+            PATCH_VERSION=${{ needs.setup-environment.outputs.patch_version }}
+
             if [[ "$MAJOR_BUMP" == true && "$MINOR_BUMP" == false ]]; then
-              NEW_MAJOR_VERSION=$(( ${{ env.MAJOR_VERSION }} + 1 ))
+              NEW_MAJOR_VERSION=$(( $MAJOR_VERSION + 1 ))
               NEW_MINOR_VERSION=0
               NEW_PATCH_VERSION=0
             elif [[ "$MINOR_BUMP" == true ]]; then
-              NEW_MAJOR_VERSION=${{ env.MAJOR_VERSION }}
-              NEW_MINOR_VERSION=$(( ${{ env.MINOR_VERSION }} + 1 ))
+              NEW_MAJOR_VERSION=$MAJOR_VERSION
+              NEW_MINOR_VERSION=$(( $MINOR_VERSION + 1 ))
               NEW_PATCH_VERSION=0
             else
-              NEW_MAJOR_VERSION=${{ env.MAJOR_VERSION }}
-              NEW_MINOR_VERSION=${{ env.MINOR_VERSION }}
-              NEW_PATCH_VERSION=$(( ${{ env.PATCH_VERSION }} + 1 ))
+              NEW_MAJOR_VERSION=$MAJOR_VERSION
+              NEW_MINOR_VERSION=$MINOR_VERSION
+              NEW_PATCH_VERSION=$(( $PATCH_VERSION + 1 ))
             fi
-
-            # 更新版本号和计数器到文件中
+             # 更新版本号到文件中
             echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION" > $VERSION_FILE
-            if [[ "$MAJOR_BUMP" == true || "$MINOR_BUMP" == true ]]; then
-              echo 0 > $COUNTER_FILE
-            else
-              echo $(( ${{ env.COUNTER }} + 1 )) > $COUNTER_FILE
-            fi
+            echo ::set-output name=version_info::$(echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION" )
           fi
+      
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PULL_SECRET }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Create Release
-        if: ${{ steps.check_commit_message.outputs.commit_message != 'save' && github.ref=='refs/heads/main' && github.event_name=='push'}}
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
-          release_name: v ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
+          tag_name: ${{ steps.update_version.version_info.outputs.version_info }}
+          release_name: v ${{ steps.update_version.version_info.outputs.version_info }}
           body: Automated release created by GitHub Actions.
           draft: false
           prerelease: false
 
       - name: Upload Binary to Release
-        if: ${{ steps.check_commit_message.outputs.commit_message != 'save' && github.ref=='refs/heads/main' && github.event_name=='push'}}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
