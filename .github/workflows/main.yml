@@ -130,8 +130,6 @@ jobs:
               NEW_MINOR_VERSION=$MINOR_VERSION
               NEW_PATCH_VERSION=$(( $PATCH_VERSION + 1 ))
             fi
-             # 更新版本号到文件中
-            echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION" > $VERSION_FILE
             echo ::set-output name=version_info::$(echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION" )
           fi
 
