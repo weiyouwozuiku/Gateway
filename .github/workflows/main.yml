@@ -16,21 +16,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo ::set-output name=latest_tag::$(git describe --tags $(git rev-list --tags --max-count=1))
       # 读取版本号并更新
       - name: Read version
         id: read_version
         run: |
-          if [[ ! -f $VERSION_FILE ]]; then
-            echo "1.0.0" > $VERSION_FILE
+          latest_tag=$("${{ steps.get_latest_tag.outputs.latest_tag }}")
+          if [[ "$latest_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Latest tag matches the pattern vX.X.X"
+            major_version=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
+            minor_version=$(echo $latest_tag | cut -d '.' -f 2)
+            patch_version=$(echo $latest_tag | cut -d '.' -f 3)
+            echo "Major version: $major, Minor version: $minor, Patch version: $patch"
+          else
+            echo "Latest tag does not match the pattern vX.X.X"
+            major_version=1
+            minor_version=0
+            patch_version=0
           fi
-          cat $VERSION_FILE
-          VERSION=$(cat $VERSION_FILE)
-          echo ::set-output name=major_version::$(echo $VERSION | cut -d '.' -f 1)
-          echo ::set-output name=minor_version::$(echo $VERSION | cut -d '.' -f 2)
-          echo ::set-output name=patch_version::$(echo $VERSION | cut -d '.' -f 3)
-          ls -al
-          pwd
+          echo ::set-output name=major_version::$major_version
+          echo ::set-output name=minor_version::$minor_version
+          echo ::set-output name=patch_version::$patch_version
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
@@ -41,6 +49,7 @@ jobs:
     needs: setup-environment
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
 
 #      - name: Set tag name
 #        id: tag_name
