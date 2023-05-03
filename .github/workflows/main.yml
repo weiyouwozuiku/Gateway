@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: ECHO PWD
-        run: echo ${{needs.setup-environment.read_version.outputs.major_version}}
+        run: echo ${{needs.setup-environment.steps.read_version.outputs.major_version}}
       - name: Update version
         id: update_version
         if: ${{ needs.setup-environment.outputs.commit_message != 'save' }}
