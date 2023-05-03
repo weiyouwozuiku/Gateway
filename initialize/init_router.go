@@ -55,7 +55,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 	// admin_login
 	adminLoginRouter := router.Group("/admin_login")
-
 	adminLoginRouter.Use(
 		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
@@ -88,6 +87,28 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		middleware.ValidtorMiddleware())
 	{
 		controller.ServiceRegister(serviceRouter)
+	}
+
+	dashRouter := router.Group("/dashboard")
+	dashRouter.Use(
+		sessions.Sessions(AdminSession, store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.ValidtorMiddleware())
+	{
+		controller.DashboardRegister(dashRouter)
+	}
+
+	appRouter := router.Group("/app")
+	appRouter.Use(
+		sessions.Sessions(AdminSession, store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.ValidtorMiddleware())
+	{
+		controller.AppRegister(appRouter)
 	}
 	// TODO 后续增加router
 	return router

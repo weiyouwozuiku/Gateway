@@ -1,9 +1,11 @@
 package public
 
 import (
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -101,4 +103,9 @@ func InStringSlice(slice []string, str string) bool {
 		}
 	}
 	return false
+}
+func MD5(s string) string {
+	h := md5.New()
+	io.WriteString(h, s)
+	return fmt.Sprintf("%x", h.Sum(nil))
 }

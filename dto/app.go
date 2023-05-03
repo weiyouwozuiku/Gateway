@@ -17,12 +17,12 @@ func (params *AppListInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
 
-type APPListOutput struct {
-	List  []APPListItemOutput `json:"list" form:"list" comment:"租户列表"`
+type AppListOutput struct {
+	List  []AppListItemOutput `json:"list" form:"list" comment:"租户列表"`
 	Total int64               `json:"total" form:"total" comment:"租户总数"`
 }
 
-type APPListItemOutput struct {
+type AppListItemOutput struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
 	AppID     string    `json:"app_id" gorm:"column:app_id" description:"租户id	"`
 	Name      string    `json:"name" gorm:"column:name" description:"租户名称	"`
@@ -37,11 +37,11 @@ type APPListItemOutput struct {
 	IsDelete  int8      `json:"is_delete" gorm:"column:is_delete" description:"是否已删除；0：否；1：是"`
 }
 
-type APPDetailInput struct {
+type AppDetailInput struct {
 	ID int64 `json:"id" form:"id" comment:"租户ID" validate:"required"`
 }
 
-func (params *APPDetailInput) BindValidParam(c *gin.Context) error {
+func (params *AppDetailInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
 
@@ -68,7 +68,7 @@ type AppUpdateHttpInput struct {
 	AppID    string `json:"app_id" form:"app_id" gorm:"column:app_id" comment:"租户id" validate:""`
 	Name     string `json:"name" form:"name" gorm:"column:name" comment:"租户名称" validate:"required"`
 	Secret   string `json:"secret" form:"secret" gorm:"column:secret" comment:"密钥" validate:"required"`
-	WhiteIPS string `json:"white_ips" form:"white_ips" gorm:"column:white_ips" comment:"ip白名单，支持前缀匹配		"`
+	WhiteIPS string `json:"white_ips" form:"white_ips" gorm:"column:white_ips" comment:"ip白名单，支持前缀匹配"`
 	Qpd      int64  `json:"qpd" form:"qpd" gorm:"column:qpd" comment:"日请求量限制"`
 	Qps      int64  `json:"qps" form:"qps" gorm:"column:qps" comment:"每秒请求量限制"`
 }
