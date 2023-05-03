@@ -82,8 +82,14 @@ jobs:
           if [[ ! -f $VERSION_FILE ]]; then
             echo "1.0.0" > $VERSION_FILE
           fi
-
           cat $VERSION_FILE
+          VERSION=$(cat $VERSION_FILE)
+          MAJOR_VERSION=$(echo $VERSION | cut -d '.' -f 1)
+          MINOR_VERSION=$(echo $VERSION | cut -d '.' -f 2)
+          PATCH_VERSION=$(echo $VERSION | cut -d '.' -f 3)
+          echo "MAJOR_VERSION=$MAJOR_VERSION"
+          echo "MINOR_VERSION=$MINOR_VERSION"
+          echo "PATCH_VERSION=$PATCH_VERSION"
 
       # 读取计数器值并更新
       - name: Read counter
