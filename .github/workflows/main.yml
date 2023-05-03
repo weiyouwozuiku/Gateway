@@ -18,8 +18,7 @@ jobs:
       - name: Get latest tag
         id: get_latest_tag
         run: |
-          ls -al
-          echo "hello"
+          git fetch
           echo $(git describe --tags $(git rev-list --tags --max-count=1))
           echo ::set-output name=latest_tag::$(git describe --tags $(git rev-list --tags --max-count=1))
       # 读取版本号并更新
