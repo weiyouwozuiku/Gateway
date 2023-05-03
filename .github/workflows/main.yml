@@ -23,6 +23,7 @@ jobs:
       - name: Read version
         id: read_version
         run: |
+          echo ${{ steps.get_latest_tag.outputs.latest_tag }}
           latest_tag=$("${{ steps.get_latest_tag.outputs.latest_tag }}")
           if [[ "$latest_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Latest tag matches the pattern vX.X.X"
