@@ -9,10 +9,6 @@ on:
 env:
   REPO_NAME: "Gateway"
   DOCKER_IMAGE_NAME: "gateway"
-  MajorVersion: 0
-  MinorVersion: 0
-  PatchVersion: 0
-  CommitMessage: ""
 
 jobs:
   setup-environment:
@@ -41,17 +37,15 @@ jobs:
             minor_version=0
             patch_version=0
           fi
-#          echo "MajorVersion=$major_version" >> $GITHUB_ENV
-#          echo "MinorVersion=$minor_version" >> $GITHUB_ENV
-#          echo "PatchVersion=$patch_version" >> $GITHUB_ENV
-#          echo $GITHUB_ENV
+          echo ::set-output name=major_version::$major_version
+          echo ::set-output name=minor_version::$minor_version
+          echo ::set-output name=patch_version::$patch_version
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
         id: check_commit_message
         run: |
-          echo "CommitMessage=$(git log --format=%B -n 1 ${{ github.sha }})" >> $GITHUB_ENV
-          echo $major_version
+          echo ::set-output name=comment_message::"$(git log --format=%B -n 1 ${{ github.sha }})"
 
   build-test:
     needs: setup-environment
@@ -98,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: ECHO PWD
-        run: echo {{env.MajorVersion}}
+        run: echo ${{setup-environment.read_version.outputs.major_version}}
       - name: Update version
         id: update_version
         if: ${{ needs.setup-environment.outputs.commit_message != 'save' }}
