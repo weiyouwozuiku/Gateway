@@ -77,7 +77,7 @@ jobs:
         run: |
           go mod tidy
           go mod download
-          echo '${{ jobs.setup-environment.outputs.major_version }}'
+          echo ${{ needs.setup-environment.outputs.major_version }}
 
       - name: Run tests
         run: |
