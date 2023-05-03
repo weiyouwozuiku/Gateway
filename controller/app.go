@@ -26,17 +26,17 @@ func AppRegister(router *gin.RouterGroup) {
 }
 
 // AppList godoc
-// @Summary 租户列表
-// @Description 租户列表
-// @Tags 租户管理
-// @ID /app/app_list
-// @Accept  json
-// @Produce  json
-// @Param info query string false "关键词"
-// @Param page_size query string true "每页多少条"
-// @Param page_no query string true "页码"
-// @Success 200 {object} middleware.Response{data=dto.AppListOutput} "success"
-// @Router /app/app_list [get]
+//	@Summary		租户列表
+//	@Description	租户列表
+//	@Tags			租户管理
+//	@ID				/app/app_list
+//	@Accept			json
+//	@Produce		json
+//	@Param			info		query		string										false	"关键词"
+//	@Param			page_size	query		string										true	"每页多少条"
+//	@Param			page_no		query		string										true	"页码"
+//	@Success		200			{object}	middleware.Response{data=dto.AppListOutput}	"success"
+//	@Router			/app/app_list [get]
 func (admin *AppController) AppList(c *gin.Context) {
 	params := &dto.AppListInput{}
 	if err := params.BindValidParam(c); err != nil {
@@ -79,15 +79,15 @@ func (admin *AppController) AppList(c *gin.Context) {
 }
 
 // AppDetail godoc
-// @Summary 租户详情
-// @Description 租户详情
-// @Tags 租户管理
-// @ID /app/app_detail
-// @Accept  json
-// @Produce  json
-// @Param id query string true "租户ID"
-// @Success 200 {object} middleware.Response{data=dao.App} "success"
-// @Router /app/app_detail [get]
+//	@Summary		租户详情
+//	@Description	租户详情
+//	@Tags			租户管理
+//	@ID				/app/app_detail
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	query		string								true	"租户ID"
+//	@Success		200	{object}	middleware.Response{data=dao.App}	"success"
+//	@Router			/app/app_detail [get]
 func (admin *AppController) AppDetail(c *gin.Context) {
 	params := &dto.AppDetailInput{}
 	if err := params.BindValidParam(c); err != nil {
@@ -107,15 +107,15 @@ func (admin *AppController) AppDetail(c *gin.Context) {
 }
 
 // AppDelete godoc
-// @Summary 租户删除
-// @Description 租户删除
-// @Tags 租户管理
-// @ID /app/app_delete
-// @Accept  json
-// @Produce  json
-// @Param id query string true "租户ID"
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /app/app_delete [get]
+//	@Summary		租户删除
+//	@Description	租户删除
+//	@Tags			租户管理
+//	@ID				/app/app_delete
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	query		string								true	"租户ID"
+//	@Success		200	{object}	middleware.Response{data=string}	"success"
+//	@Router			/app/app_delete [get]
 func (admin *AppController) AppDelete(c *gin.Context) {
 	params := &dto.AppDetailInput{}
 	if err := params.BindValidParam(c); err != nil {
@@ -140,15 +140,15 @@ func (admin *AppController) AppDelete(c *gin.Context) {
 }
 
 // AppAdd godoc
-// @Summary 租户添加
-// @Description 租户添加
-// @Tags 租户管理
-// @ID /app/app_add
-// @Accept  json
-// @Produce  json
-// @Param body body dto.AppAddHttpInput true "body"
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /app/app_add [post]
+//	@Summary		租户添加
+//	@Description	租户添加
+//	@Tags			租户管理
+//	@ID				/app/app_add
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		dto.AppAddHttpInput					true	"body"
+//	@Success		200		{object}	middleware.Response{data=string}	"success"
+//	@Router			/app/app_add [post]
 func (admin *AppController) AppAdd(c *gin.Context) {
 	params := &dto.AppAddHttpInput{}
 	if err := params.BindValidParam(c); err != nil {
@@ -185,15 +185,15 @@ func (admin *AppController) AppAdd(c *gin.Context) {
 }
 
 // AppUpdate godoc
-// @Summary 租户更新
-// @Description 租户更新
-// @Tags 租户管理
-// @ID /app/app_update
-// @Accept  json
-// @Produce  json
-// @Param body body dto.AppUpdateHttpInput true "body"
-// @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /app/app_update [post]
+//	@Summary		租户更新
+//	@Description	租户更新
+//	@Tags			租户管理
+//	@ID				/app/app_update
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		dto.AppUpdateHttpInput				true	"body"
+//	@Success		200		{object}	middleware.Response{data=string}	"success"
+//	@Router			/app/app_update [post]
 func (admin *AppController) AppUpdate(c *gin.Context) {
 	params := &dto.AppUpdateHttpInput{}
 	if err := params.BindValidParam(c); err != nil {
@@ -225,15 +225,15 @@ func (admin *AppController) AppUpdate(c *gin.Context) {
 }
 
 // AppStatistics godoc
-// @Summary 租户统计
-// @Description 租户统计
-// @Tags 租户管理
-// @ID /app/app_stat
-// @Accept  json
-// @Produce  json
-// @Param id query string true "租户ID"
-// @Success 200 {object} middleware.Response{data=dto.StatisticsOutput} "success"
-// @Router /app/app_stat [get]
+//	@Summary		租户统计
+//	@Description	租户统计
+//	@Tags			租户管理
+//	@ID				/app/app_stat
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	query		string											true	"租户ID"
+//	@Success		200	{object}	middleware.Response{data=dto.StatisticsOutput}	"success"
+//	@Router			/app/app_stat [get]
 func (admin *AppController) AppStatistics(c *gin.Context) {
 	params := &dto.AppDetailInput{}
 	if err := params.BindValidParam(c); err != nil {
