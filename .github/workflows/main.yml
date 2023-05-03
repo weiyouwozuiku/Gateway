@@ -27,7 +27,7 @@ jobs:
 
       - name: Use tag name in next step
         run: |
-          echo "Tag name is: $TAG_NAME"
+          echo "Tag name is: ${{ env.TAG_NAME }}"
         shell: bash
 
 #      - name: Set up Go
@@ -91,23 +91,3 @@ jobs:
 #          asset_path: ./${{env.REPO_NAME}}
 #          asset_name: ${{env.REPO_NAME}}
 #          asset_content_type: application/octet-stream
-#
-#      - name: Upload Source Code Package to Release
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ../source_code.tar.gz
-#          asset_name: "Source code.tar.gz"
-#          asset_content_type: application/gzip
-#
-#      - name: Upload Source Code Package to Release
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ../source_code.zip
-#          asset_name: "Source code.zip"
-#          asset_content_type: application/zip
