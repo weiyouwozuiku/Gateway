@@ -110,7 +110,7 @@ jobs:
           fi
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=${{ needs.setup-environment.outputs.comment_message }}
+            COMMIT_MESSAGE="${{ needs.setup-environment.outputs.comment_message }}"
             MAJOR_BUMP=false
             MINOR_BUMP=false
 
