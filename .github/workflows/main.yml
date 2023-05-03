@@ -45,6 +45,7 @@ jobs:
       - name: Check commit message
         id: check_commit_message
         run: |
+          echo ${{ steps.read_version.outputs.major_version }}
           echo ::set-output name=comment_message::"$(git log --format=%B -n 1 ${{ github.sha }})"
 
   build-test:
@@ -75,7 +76,7 @@ jobs:
         run: |
           go mod tidy
           go mod download
-          echo $GITHUB_ENV
+          echo ${{ needs.setup-environment.steps.read_version.outputs.major_version }}
 
       - name: Run tests
         run: |
