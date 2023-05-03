@@ -18,7 +18,7 @@ jobs:
       - name: Get latest tag
         id: get_latest_tag
         run: |
-          git fetch
+          git fetch --tags
           echo $(git rev-list --tags --max-count=1)
           echo $(git describe --tags $(git rev-list --tags --max-count=1))
           echo ::set-output name=latest_tag::$(git describe --tags $(git rev-list --tags --max-count=1))
