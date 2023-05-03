@@ -21,8 +21,8 @@ jobs:
 
       - name: Set tag name
         run: |
-          TAG_NAME="$(echo ${GITHUB_REF##*/})_$(date +%s)"
-          export TAG_NAME="$TAG_NAME"
+          TAG_NAME=$(echo ${GITHUB_REF##*/})_$(date +%s)
+          export TAG_NAME=$TAG_NAME
         shell: bash
 
       - name: Use tag name in next step
@@ -92,15 +92,15 @@ jobs:
 #          asset_name: ${{env.REPO_NAME}}
 #          asset_content_type: application/octet-stream
 #
-      - name: Upload Source Code Package to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ../source_code.tar.gz
-          asset_name: "Source code.tar.gz"
-          asset_content_type: application/gzip
+#      - name: Upload Source Code Package to Release
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ../source_code.tar.gz
+#          asset_name: "Source code.tar.gz"
+#          asset_content_type: application/gzip
 #
 #      - name: Upload Source Code Package to Release
 #        uses: actions/upload-release-asset@v1
