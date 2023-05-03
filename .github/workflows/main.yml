@@ -74,8 +74,7 @@ jobs:
         run: |
           go mod tidy
           go mod download
-          ls -al
-          pwd
+          echo ${{ needs.setup-environment.outputs.major_version }}
 
       - name: Run tests
         run: |
@@ -112,7 +111,7 @@ jobs:
               MINOR_BUMP=true
             fi
 
-            # 读取环境变量中的版本号和计数器值
+            # 读取环境变量中的版本号
             MAJOR_VERSION=${{ needs.setup-environment.outputs.major_version }}
             MINOR_VERSION=${{ needs.setup-environment.outputs.minor_version }}
             PATCH_VERSION=${{ needs.setup-environment.outputs.patch_version }}
