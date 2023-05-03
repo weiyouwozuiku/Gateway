@@ -44,6 +44,7 @@ jobs:
           echo "MajorVersion=$major_version" >> $GITHUB_ENV
           echo "MinorVersion=$minor_version" >> $GITHUB_ENV
           echo "PatchVersion=$patch_version" >> $GITHUB_ENV
+          echo $GITHUB_ENV
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
