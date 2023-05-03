@@ -40,7 +40,7 @@ jobs:
             minor_version=0
             patch_version=0
           fi
-          echo "MajorVersion=$minor_version" 》》 ￥GITHUB_ENV
+          echo "MajorVersion=$minor_version" >> $GITHUB_ENV
           echo ::set-output name=minor_version::$minor_version
           echo ::set-output name=patch_version::$patch_version
           echo ${{env.MajorVersion}}
