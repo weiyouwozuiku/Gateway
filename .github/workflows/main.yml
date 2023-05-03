@@ -95,22 +95,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: ECHO PWD
-        run:  |
-          echo ${{ needs.setup-environment.outputs.major_version }}
-          echo ${{ needs.setup-environment.outputs.minor_version }}
-          echo ${{ needs.setup-environment.outputs.patch_version }}
-          echo ${{ needs.setup-environment.outputs.comment_message }}
+#      - name: ECHO PWD
+#        run:  |
+#          echo ${{ needs.setup-environment.outputs.major_version }}
+#          echo ${{ needs.setup-environment.outputs.minor_version }}
+#          echo ${{ needs.setup-environment.outputs.patch_version }}
+#          echo ${{ needs.setup-environment.outputs.comment_message }}
       - name: Update version
         id: update_version
-        if: ${{ needs.setup-environment.outputs.commit_message != 'save' }}
+        if: ${{ needs.setup-environment.outputs.comment_message != 'save' }}
         run: |
           if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
             exit 0
           fi
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=${{ needs.setup-environment.outputs.commit_message }}
+            COMMIT_MESSAGE=${{ needs.setup-environment.outputs.comment_message }}
             MAJOR_BUMP=false
             MINOR_BUMP=false
 
@@ -144,38 +144,38 @@ jobs:
       - name: echo version info
         run: echo ${{ steps.update_version.outputs.version_info }}
 
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKER_PULL_SECRET }}
-#
-#      - name: Build and push Docker images
-#        uses: docker/build-push-action@v4
-#        with:
-#          push: true
-#          tags: |
-#            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-#            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-#
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ steps.update_version.version_info.outputs.version_info }}
-#          release_name: v ${{ steps.update_version.version_info.outputs.version_info }}
-#          body: Automated release created by GitHub Actions.
-#          draft: false
-#          prerelease: false
-#
-#      - name: Upload Binary to Release
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./${{env.REPO_NAME}}
-#          asset_name: ${{env.REPO_NAME}}
-#          asset_content_type: application/octet-stream
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PULL_SECRET }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.update_version.outputs.version_info }}
+          release_name: v ${{ steps.update_version.outputs.version_info }}
+          body: Automated release created by GitHub Actions.
+          draft: false
+          prerelease: false
+
+      - name: Upload Binary to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{env.REPO_NAME}}
+          asset_name: ${{env.REPO_NAME}}
+          asset_content_type: application/octet-stream
