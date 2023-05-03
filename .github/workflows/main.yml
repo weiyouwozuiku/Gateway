@@ -41,15 +41,17 @@ jobs:
             minor_version=0
             patch_version=0
           fi
-          echo "MajorVersion=$major_version" >> $GITHUB_ENV
-          echo "MinorVersion=$minor_version" >> $GITHUB_ENV
-          echo "PatchVersion=$patch_version" >> $GITHUB_ENV
-          echo $GITHUB_ENV
+#          echo "MajorVersion=$major_version" >> $GITHUB_ENV
+#          echo "MinorVersion=$minor_version" >> $GITHUB_ENV
+#          echo "PatchVersion=$patch_version" >> $GITHUB_ENV
+#          echo $GITHUB_ENV
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
         id: check_commit_message
-        run: echo "CommitMessage=$(git log --format=%B -n 1 ${{ github.sha }})" >> $GITHUB_ENV
+        run: |
+          echo "CommitMessage=$(git log --format=%B -n 1 ${{ github.sha }})" >> $GITHUB_ENV
+          echo $major_version
 
   build-test:
     needs: setup-environment
