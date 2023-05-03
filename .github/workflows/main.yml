@@ -16,9 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: ECHO
-        run: echo $(echo ${GITHUB_REF##*/})_$(date +%s)
+      - name: Set environment variables
+        run: echo $(echo ${GITHUB_REF##*/})_$(date +%s) >> $GITHUB_TAG_NAME
 
 #      - name: Set up Go
 #        uses: actions/setup-go@v4
@@ -66,8 +65,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: echo $(echo ${GITHUB_REF##*/})_$(date +%s)
-          release_name: Release $(echo ${GITHUB_REF##*/})_$(date +%s)
+          tag_name: $GITHUB_TAG_NAME
+          release_name: Release $GITHUB_TAG_NAME
           body: Automated release created by GitHub Actions.
           draft: false
           prerelease: false
