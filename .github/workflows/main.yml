@@ -45,15 +45,7 @@ jobs:
       - name: Run tests
         run: |
           echo $GITHUB_WORKSPACE
-          pwd
           # go test ./...
-
-      - name: Compress Source Code
-        run: |
-          cd ..
-          tar -czvf source_code.tar.gz $GITHUB_WORKSPACE
-          zip -r source_code.zip $GITHUB_WORKSPACE
-          cd $GITHUB_WORKSPACE
 
       - name: Build binary
         run: GOOS=linux GOARCH=amd64 go build -o ${{env.REPO_NAME}}
