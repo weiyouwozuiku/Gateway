@@ -41,7 +41,6 @@ jobs:
     needs: setup-environment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
 
 #      - name: Set tag name
 #        id: tag_name
