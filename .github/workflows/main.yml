@@ -9,6 +9,9 @@ on:
 env:
   REPO_NAME: "Gateway"
   DOCKER_IMAGE_NAME: "gateway"
+  MajorVersion: 0
+  MinorVersion: 0
+  PatchVersion: 0
 
 jobs:
   setup-environment:
@@ -27,7 +30,7 @@ jobs:
           latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
           if [[ "$latest_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Latest tag matches the pattern vX.X.X"
-            major_version=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
+            {{env.MajorVersion}}=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
             minor_version=$(echo $latest_tag | cut -d '.' -f 2)
             patch_version=$(echo $latest_tag | cut -d '.' -f 3)
             echo "Major version: $major, Minor version: $minor, Patch version: $patch"
@@ -40,6 +43,7 @@ jobs:
           echo ::set-output name=major_version::$major_version
           echo ::set-output name=minor_version::$minor_version
           echo ::set-output name=patch_version::$patch_version
+          echo 
 
       # 检查出当前提交的 commit message 并设置输出变量
       - name: Check commit message
@@ -91,7 +95,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: ECHO PWD
-        run: ls -al
+        run: echo {{env.MajorVersion}}
       - name: Update version
         id: update_version
         if: ${{ needs.setup-environment.outputs.commit_message != 'save' }}
