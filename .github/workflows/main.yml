@@ -13,6 +13,8 @@ env:
 jobs:
   setup-environment:
     runs-on: ubuntu-latest
+    outputs:
+      major_version: ${{ steps.read_version.outputs.major_version }}
     steps:
       - uses: actions/checkout@v3
       - name: Get latest tag
