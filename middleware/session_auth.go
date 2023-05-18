@@ -13,8 +13,8 @@ func SessionAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		demo := ctx.Request.Cookies()
 		fmt.Sprint("%v", demo)
-		session := sessions.Default(ctx)
-		if adminInfo, ok := session.Get(public.AdminSessionInfoKey).(string); !ok || adminInfo == "" {
+		sess := sessions.Default(ctx)
+		if adminInfo, ok := sess.Get(public.AdminSessionInfoKey).(string); !ok || adminInfo == "" {
 			ResponseError(ctx, AdminLoginErr, errors.New("user not login"))
 			ctx.Abort()
 			return
