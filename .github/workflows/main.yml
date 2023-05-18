@@ -35,7 +35,7 @@ jobs:
             major_version=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
             minor_version=$(echo $latest_tag | cut -d '.' -f 2)
             patch_version=$(echo $latest_tag | cut -d '.' -f 3)
-            echo "Major version: major_version, Minor version: minor_version, Patch version: patch_version"
+            echo "Major version: $major_version, Minor version: $minor_version, Patch version: $patch_version"
           else
             echo "Latest tag does not match the pattern vX.X.X"
             major_version=1
@@ -138,6 +138,9 @@ jobs:
               NEW_MINOR_VERSION=$MINOR_VERSION
               NEW_PATCH_VERSION=$(( $PATCH_VERSION + 1 ))
             fi
+
+            echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION"
+
             echo ::set-output name=version_info::$(echo "$NEW_MAJOR_VERSION.$NEW_MINOR_VERSION.$NEW_PATCH_VERSION" )
           fi
 
