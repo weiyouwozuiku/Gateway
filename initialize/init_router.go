@@ -37,7 +37,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router.Use(cors.Default())
 	router.Use(middlewares...)
 
-	// 登录session存放redis
+	// 登录session存放redis，创建基于cookie的存储引擎，SessionKey 参数是用于加密的密钥
 	store, err := sessions.NewRedisStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), SessionKey)
 	if err != nil {
 		log.Fatalf("sessions.NewRedisStore err:%v", err)
@@ -56,6 +56,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	// admin_login
 	adminLoginRouter := router.Group("/admin_login")
 	adminLoginRouter.Use(
+		// 参数AdminSession，指的是session的名字，也是cookie的名字
 		sessions.Sessions(AdminSession, store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),

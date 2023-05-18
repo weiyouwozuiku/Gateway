@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ type ServiceInfo struct {
 	CreatedAt   time.Time `json:"update_at" gorm:"column:update_at" description:"添加时间"`
 	IsDelete    int8      `json:"is_delete" gorm:"column:is_delete" description:"是否已删除；0：否；1：是"`
 }
+
+type RuleInfo func(ctx *gin.Context, tx *gorm.DB, id int64) any
 
 func (info *ServiceInfo) TableName() string {
 	return "gateway_service_info"
@@ -62,28 +65,34 @@ func (info *ServiceInfo) ServiceDetail(ctx *gin.Context, tx *gorm.DB, search *Se
 	}
 
 	resultChan := make(chan any, 5)
-	findHttpRule(ctx, tx, search.ID, resultChan)
-	findTcpRule(ctx, tx, search.ID, resultChan)
-	findGrpcRule(ctx, tx, search.ID, resultChan)
-	findAccess(ctx, tx, search.ID, resultChan)
-	findLoad(ctx, tx, search.ID, resultChan)
-
+	defer close(resultChan)
+	rules := []RuleInfo{findHttpRule, findTcpRule, findGrpcRule, findAccess, findLoad}
+	wg := sync.WaitGroup{}
+	for _, rule := range rules {
+		r := rule
+		wg.Add(1)
+		go func(ctx *gin.Context, tx *gorm.DB, id int64) {
+			defer wg.Done()
+			resultChan <- r(ctx, tx, id)
+		}(ctx, tx, search.ID)
+	}
+	wg.Wait()
 	detail := &ServiceDetail{Info: search}
 	for i := 0; i < 5; i++ {
 		result := <-resultChan
-		switch result.(type) {
+		switch result := result.(type) {
 		case *HttpRule:
-			detail.HTTPRule = result.(*HttpRule)
+			detail.HTTPRule = result
 		case *TcpRule:
-			detail.TCPRule = result.(*TcpRule)
+			detail.TCPRule = result
 		case *GrpcRule:
-			detail.GRPCRule = result.(*GrpcRule)
+			detail.GRPCRule = result
 		case *LoadBalance:
-			detail.LoadBalance = result.(*LoadBalance)
+			detail.LoadBalance = result
 		case *AccessControl:
-			detail.AccessControl = result.(*AccessControl)
+			detail.AccessControl = result
 		case error:
-			return nil, result.(error)
+			return nil, result
 		}
 	}
 	return detail, nil
@@ -96,53 +105,53 @@ func (info *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]dto.Das
 	return list, nil
 }
 
-func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findHttpRule(ctx *gin.Context, tx *gorm.DB, searchId int64) any {
 	var err error
 	item := &HttpRule{ServiceID: searchId}
 	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		resultChan <- err
+		return err
 	} else {
-		resultChan <- item
+		return item
 	}
 }
-func findTcpRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findTcpRule(ctx *gin.Context, tx *gorm.DB, searchId int64) any {
 	var err error
 	item := &TcpRule{ServiceID: searchId}
 	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		resultChan <- err
+		return err
 	} else {
-		resultChan <- item
+		return item
 	}
 }
-func findGrpcRule(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findGrpcRule(ctx *gin.Context, tx *gorm.DB, searchId int64) any {
 	var err error
 	item := &GrpcRule{ServiceID: searchId}
 	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		resultChan <- err
+		return err
 	} else {
-		resultChan <- item
+		return item
 	}
 }
-func findAccess(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findAccess(ctx *gin.Context, tx *gorm.DB, searchId int64) any {
 	var err error
 	item := &AccessControl{ServiceID: searchId}
 	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		resultChan <- err
+		return err
 	} else {
-		resultChan <- item
+		return item
 	}
 }
-func findLoad(ctx *gin.Context, tx *gorm.DB, searchId int64, resultChan chan<- any) {
+func findLoad(ctx *gin.Context, tx *gorm.DB, searchId int64) any {
 	var err error
 	item := &LoadBalance{ServiceID: searchId}
 	item, err = item.Find(ctx, tx, item)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		resultChan <- err
+		return err
 	} else {
-		resultChan <- item
+		return item
 	}
 }

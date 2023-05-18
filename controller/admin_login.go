@@ -2,9 +2,11 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/weiyouwozuiku/Gateway/handler"
-	"time"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -62,6 +64,9 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 		return
 	}
 	sess := sessions.Default(ctx)
+	sess.Options(sessions.Options{
+		Path: "/",
+	})
 	// session一天过期
 	sess.Options(sessions.Options{MaxAge: 24 * 60 * 60})
 	sess.Set(public.AdminSessionInfoKey, string(sessBts))
@@ -71,6 +76,8 @@ func (ad *AdminLoginController) AdminLogin(ctx *gin.Context) {
 		return
 	}
 	out := &dto.AdminLoginOutput{Token: admin.UserName}
+	cookie := ctx.Writer.Header().Get("Set-cookie")
+	fmt.Sprint("%v", cookie)
 	middleware.ResponseSuccess(ctx, out)
 }
 
