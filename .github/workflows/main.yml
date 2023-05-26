@@ -30,7 +30,7 @@ jobs:
         id: read_version
         run: |
           latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
-          if [[ "$latest_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$latest_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Latest tag matches the pattern vX.X.X"
             major_version=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')
             minor_version=$(echo $latest_tag | cut -d '.' -f 2)
