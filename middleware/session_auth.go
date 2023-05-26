@@ -2,17 +2,14 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
 func SessionAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		demo := ctx.Request.Cookies()
-		fmt.Sprint("%v", demo)
 		sess := sessions.Default(ctx)
 		if adminInfo, ok := sess.Get(public.AdminSessionInfoKey).(string); !ok || adminInfo == "" {
 			ResponseError(ctx, AdminLoginErr, errors.New("user not login"))

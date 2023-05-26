@@ -26,6 +26,7 @@ func HttpServerRun() {
 		Addr:           public.GetStringConf("base.http.addr"),
 		Handler:        r,
 		ReadTimeout:    time.Duration(public.GetIntConf("base.http.read_timeout")) * time.Second,
+		WriteTimeout:   time.Duration(public.GetIntConf("base.http.write_timeout")) * time.Second,
 		MaxHeaderBytes: 1 << uint(public.GetIntConf("base.http.max_header_bytes")),
 	}
 	go func() {

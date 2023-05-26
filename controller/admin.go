@@ -3,7 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/contrib/sessions"
+
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/weiyouwozuiku/Gateway/dao"
 	"github.com/weiyouwozuiku/Gateway/dto"

@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -38,7 +39,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router.Use(middlewares...)
 
 	// 登录session存放redis，创建基于cookie的存储引擎，SessionKey 参数是用于加密的密钥
-	store, err := sessions.NewRedisStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), SessionKey)
+	store, err := redis.NewStore(10, "tcp", public.GetStringConf("base.session.redis_server"), public.GetStringConf("base.session.redis_password"), SessionKey)
 	if err != nil {
 		log.Fatalf("sessions.NewRedisStore err:%v", err)
 	}
