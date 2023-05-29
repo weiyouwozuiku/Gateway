@@ -46,8 +46,6 @@ func InitDBConf(confName string) error {
 	if len(DBConfMap.List) == 0 {
 		fmt.Printf("[INFO] %s%s\n", time.Now().Format(public.TimeFormat), " empty mysql config.")
 	}
-	DBMapPool = map[string]*sql.DB{}
-	GORMMapPool = map[string]*gorm.DB{}
 	for k, v := range DBConfMap.List {
 		// 原生db连接池
 		sqlDB, err := sql.Open(v.DriverName, v.DataSourceName)
@@ -102,6 +100,10 @@ func GetGORMPool(name string) (*gorm.DB, error) {
 	return nil, errors.New("get GORMPool error")
 }
 func CloseDB() error {
+	// 如果没初始化出资源，直接返回
+	if len(DBMapPool) == 0 && len(GORMMapPool) == 0 {
+		return nil
+	}
 	for _, db := range DBMapPool {
 		if err := db.Close(); err != nil {
 			return err

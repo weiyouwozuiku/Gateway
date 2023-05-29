@@ -58,19 +58,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-#      - name: Set tag name
-#        id: tag_name
-#        run: |
-#          TAG_NAME=$(echo ${GITHUB_REF##*/})_$(date +%s)
-#          echo "TAG_NAME is $TAG_NAME"
-#          echo "::set-output name=tag_name::$TAG_NAME"
-#        shell: bash
-#
-#      - name: Use tag name in next step
-#        run: |
-#          echo "Tag name is: ${{ steps.tag_name.outputs.tag_name }}"
-#        shell: bash
-
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -95,12 +82,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-#      - name: ECHO PWD
-#        run:  |
-#          echo ${{ needs.setup-environment.outputs.major_version }}
-#          echo ${{ needs.setup-environment.outputs.minor_version }}
-#          echo ${{ needs.setup-environment.outputs.patch_version }}
-#          echo ${{ needs.setup-environment.outputs.comment_message }}
       - name: Update version
         id: update_version
         if: ${{ needs.setup-environment.outputs.comment_message != 'save' }}

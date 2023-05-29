@@ -15,10 +15,7 @@ func main() {
 }
 func startControl() {
 	log.Println("start controller application")
-	if err := initialize.InitModules("./conf/dev/"); err != nil {
-		initialize.Destory()
-		fmt.Println(err)
-	}
+	initialize.InitModules("./conf/dev/")
 	defer initialize.Destory()
 	router.HttpServerRun()
 	quit := make(chan os.Signal, 1)

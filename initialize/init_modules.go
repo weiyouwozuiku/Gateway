@@ -1,43 +1,51 @@
 package initialize
 
 import (
-	"errors"
 	"fmt"
 	"github.com/weiyouwozuiku/Gateway/handler"
 	"log"
 	"os"
+	"reflect"
+	"runtime"
 	"time"
 
 	mylog "github.com/weiyouwozuiku/Gateway/log"
 	"github.com/weiyouwozuiku/Gateway/public"
 )
 
-func InitModules(path string, modules ...string) error {
-	if path == "" {
-		return errors.New("")
-	}
-	if len(modules) == 0 {
-		if err := initModules(path, []string{"base", "mysql", "redis"}); err != nil {
-			return err
-		}
-	} else {
-		if err := initModules(path, modules); err != nil {
-			return err
-		}
-	}
-	return nil
+type initFunc func() error
+type closeFunc func() error
+
+var configPath string
+
+var initFn = []initFunc{
+	initBase,
+	initDB,
+	initKV,
 }
-func initModules(configPath string, modules []string) error {
-	if configPath == "" {
-		fmt.Println("input config file like ./conf/dev/")
+
+func InitModules(path string) {
+	var err error
+	if path == "" {
+		log.Println("input config file like ./conf/dev/")
 		os.Exit(1)
 	}
-
+	configPath = path
 	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO]  config=%s\n", configPath)
 	log.Printf("[INFO] %s\n", " start loading resources.")
 	log.Println("------------------------------------------------------------------------")
 
+	for _, fn := range initFn {
+		err = fn()
+		if err != nil {
+			Destory()
+			log.Panicf("Server Init failed,func name is %s", runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name())
+		}
+	}
+}
+
+func initBase() error {
 	// 设置ip信息，优先设置便于日志打印
 	ips := public.GetLocalIPs()
 	if len(ips) > 0 {
@@ -53,11 +61,20 @@ func initModules(configPath string, modules []string) error {
 	}
 
 	// 加载base配置
-	if public.InArrayString("base", modules) {
-		if err := public.InitBaseConf("base"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitBaseConf:"+err.Error())
-		}
+	if err := public.InitBaseConf("base"); err != nil {
+		log.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitBaseConf:"+err.Error())
+		return err
 	}
+	return nil
+}
+func initDB() error {
+	return nil
+}
+func initKV() error {
+	return nil
+}
+
+func initModules(configPath string, modules []string) error {
 
 	// 设置时区
 	if location, err := time.LoadLocation(public.ConfBase.TimeLocation); err != nil {
