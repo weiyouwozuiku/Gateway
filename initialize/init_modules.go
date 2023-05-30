@@ -43,6 +43,9 @@ func InitModules(path string) {
 			log.Panicf("Server Init failed,func name is %s", runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name())
 		}
 	}
+
+	log.Printf("[INFO] %s\n", " success loading resources.")
+	log.Println("------------------------------------------------------------------------")
 }
 
 func initBase() error {
@@ -65,42 +68,29 @@ func initBase() error {
 		log.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitBaseConf:"+err.Error())
 		return err
 	}
-	return nil
-}
-func initDB() error {
-	return nil
-}
-func initKV() error {
-	return nil
-}
-
-func initModules(configPath string, modules []string) error {
-
 	// 设置时区
 	if location, err := time.LoadLocation(public.ConfBase.TimeLocation); err != nil {
 		return err
 	} else {
 		public.TimeLocation = location
 	}
-
-	// 加载mysql配置
-	if public.InArrayString("mysql", modules) {
-		if err := handler.InitDBConf("mysql"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitDBConf:"+err.Error())
-		}
-	}
-
-	// 加载redis配置
-	if public.InArrayString("redis", modules) {
-		if err := handler.InitRedisConf("redis"); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitRedisConf:"+err.Error())
-		}
-	}
-
-	log.Printf("[INFO] %s\n", " success loading resources.")
-	log.Println("------------------------------------------------------------------------")
 	return nil
 }
+func initDB() error {
+	if err := handler.InitDBConf("mysql"); err != nil {
+		fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitDBConf:"+err.Error())
+		return err
+	}
+	return nil
+}
+func initKV() error {
+	if err := handler.InitRedisConf("redis"); err != nil {
+		fmt.Printf("[ERROR] %s%s\n", time.Now().Format(public.TimeFormat), " InitRedisConf:"+err.Error())
+		return err
+	}
+	return nil
+}
+
 func Destory() {
 	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO] %s\n", " start destroy resources.")

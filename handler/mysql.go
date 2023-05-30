@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	DBMapPool              map[string]*sql.DB
-	GORMMapPool            map[string]*gorm.DB
+	DBMapPool              = make(map[string]*sql.DB, 1)
+	GORMMapPool            = make(map[string]*gorm.DB, 1)
 	DBDefaultPool          *sql.DB
 	GORMDefaultPool        *gorm.DB
 	DefaultMySQLGORMLogger = MySQLGORMLogger{
