@@ -12,6 +12,7 @@ const (
 	undefErrCode
 	validErrCode
 	paramErrCode
+	pwdErrCode
 	dBErrCode
 	getGormPoolFailed
 	gROUPALL_SAVE_FLOWERROR
@@ -25,6 +26,7 @@ const (
 var (
 	InnerErr        = Error{errno: innerErrCode, errmsg: "内部错误"}
 	ParamErr        = Error{errno: paramErrCode, errmsg: "参数错误"}
+	PwdErr          = Error{errno: pwdErrCode, errmsg: "密码错误"}
 	DBErr           = Error{errno: dBErrCode, errmsg: "数据库错误"}
 	ValidErr        = Error{errno: validErrCode, errmsg: "参数不合法"}
 	GetGormPoolErr  = Error{errno: getGormPoolFailed, errmsg: "获取gorm失败"}

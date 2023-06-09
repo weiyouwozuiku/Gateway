@@ -89,6 +89,10 @@ func (ad *AdminController) ChangePwd(ctx *gin.Context) {
 		middleware.ResponseError(ctx, middleware.QueryGormErr, err)
 		return
 	}
+	if adminInfo.Password != public.GenSaltPasswd(adminInfo.Salt, param.OriginPassword) {
+		middleware.ResponseError(ctx, middleware.PwdErr, err)
+		return
+	}
 	// 3. param.password+adminInfo.salt sha256 saltPassword
 	adminInfo.Password = public.GenSaltPasswd(adminInfo.Salt, param.Password)
 	// 4. saltPassword==>adminInfo.password 执行数据保存

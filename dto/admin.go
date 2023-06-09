@@ -16,7 +16,8 @@ type AdminInfoOutput struct {
 	Roles        []string  `json:"roles"`
 }
 type ChangePwdInput struct {
-	Password string `json:"password" form:"password" comment:"密码" example:"123456" validate:"required"` //密码
+	OriginPassword string `json:"origin_password" comment:"原密码" example:"123456" validate:"required"`
+	Password       string `json:"password" form:"password" comment:"密码" example:"123456" validate:"required"` //密码
 }
 
 func (param *ChangePwdInput) BindValidParam(ctx *gin.Context) error {
