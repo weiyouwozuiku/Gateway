@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -90,13 +91,13 @@ func (ad *AdminController) ChangePwd(ctx *gin.Context) {
 		return
 	}
 	if adminInfo.Password != public.GenSaltPasswd(adminInfo.Salt, param.OriginPassword) {
-		middleware.ResponseError(ctx, middleware.PwdErr, err)
+		middleware.ResponseError(ctx, middleware.PwdErr, errors.New("原密码错误,请重新输入"))
 		return
 	}
 	// 3. param.password+adminInfo.salt sha256 saltPassword
 	adminInfo.Password = public.GenSaltPasswd(adminInfo.Salt, param.Password)
 	// 4. saltPassword==>adminInfo.password 执行数据保存
-	if err := adminInfo.Save(ctx, tx); err != nil {
+	if err = adminInfo.Save(ctx, tx); err != nil {
 		middleware.ResponseError(ctx, middleware.SaveGormErr, err)
 		return
 	}

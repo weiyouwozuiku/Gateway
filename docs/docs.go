@@ -1442,9 +1442,14 @@ const docTemplate = `{
         "dto.ChangePwdInput": {
             "type": "object",
             "required": [
+                "origin_password",
                 "password"
             ],
             "properties": {
+                "origin_password": {
+                    "type": "string",
+                    "example": "123456"
+                },
                 "password": {
                     "description": "密码",
                     "type": "string",

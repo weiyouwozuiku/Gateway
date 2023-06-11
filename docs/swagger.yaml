@@ -255,11 +255,15 @@ definitions:
     type: object
   dto.ChangePwdInput:
     properties:
+      origin_password:
+        example: "123456"
+        type: string
       password:
         description: 密码
         example: "123456"
         type: string
     required:
+    - origin_password
     - password
     type: object
   dto.DashServiceStatItemOutput:
